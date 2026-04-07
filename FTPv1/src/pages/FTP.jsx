@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+//import { useEffect } from 'react'
+import React, { useState } from 'react'
 import Section from '../components/Section'
 export default function FTP() {
 
@@ -353,6 +354,244 @@ const [maquinas,setMaquinas] = useState([
   const [VerificadoPor, setVerificadoPor] = useState()
   const [AprovadoPor, setAprovadoPor] = useState()
 
+  const[ficha, setFicha] = useState([])
+
+  const handleSaveFicha = () => {
+    const fichaSalva = {
+      // INFORMAÇÕES GERAIS
+      cabecalho: {
+        tipo,
+        versao,
+        data,
+        molde,
+        papi,
+        codmolde,
+        cavidades,
+        maquina,
+        programa,
+        ElaboraPor,
+        VerificadoPor,
+        AprovadoPor,
+      },
+
+      // DADOS BÁSICOS
+      dadosBasicos: {
+        Pilha,
+        lastro,
+        meio,
+        total,
+        pesoIdeal,
+        tolerancia,
+        pressaoInjecaoReal,
+        PH,
+      },
+
+      // TEMPOS
+      tempos: {
+        tAbertura,
+        tFechamento,
+        tDosagem,
+        tInjecao,
+        tRecalque,
+        tResfriamento,
+        tExtracao,
+        tCiclo,
+        tRebarbagem,
+        tExtracaoAux,
+        tMontagem,
+        tempoResfriamento,
+        TempoCiclo,
+      },
+
+      // MATÉRIA PRIMA E TEMPERATURAS
+      materiaPrima: {
+        materiaPrima,
+        secador,
+        secTemperatura,
+        secTempo,
+        CamaraQuente,
+      },
+
+      // ZONA DE TEMPERATURAS
+      temperaturas: {
+        bico,
+        zonas: { z1, z2, z3, z4, z5, z6, z7, z8, z9, z10, z11, z12, z13 },
+        camerasQuentes: {
+          c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13,
+          c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27,
+        },
+        obsTemperaturas,
+      },
+
+      // REFRIGERAÇÃO
+      refrigeracao: {
+        refrigeracao,
+        obsRefrigeracao,
+      },
+
+      // ABERTURA E FECHAMENTO
+      aberturaFechamento: {
+        abertura: {
+          ab1: { VEL: ab1VEL, PRES: ab1PRES, POS: ab1POS },
+          ab2: { VEL: ab2VEL, PRES: ab2PRES, POS: ab2POS },
+          ab3: { VEL: ab3VEL, PRES: ab3PRES, POS: ab3POS },
+          ab4: { VEL: ab4VEL, PRES: ab4PRES, POS: ab4POS },
+          ab5: { VEL: abFimVEL, PRES: abFimPRES, POS: abFimPOS },
+        },
+        fechamento: {
+          fecha1: { VEL: fecha1VEL, PRES: fecha1PRES, POS: fecha1POS },
+          fecha2: { VEL: fecha2VEL, PRES: fecha2PRES, POS: fecha2POS },
+          fecha3: { VEL: fecha3VEL, PRES: fecha3PRES, POS: fecha3POS },
+          fecha4: { VEL: fecha4VEL, PRES: fecha4PRES, POS: fecha4POS },
+          fecha5: { VEL: fechaFimVEL, PRES: fechaFimPRES, POS: fechaFimPOS },
+        },
+        obsAbreFecha,
+        FechaAexPres,
+        FechaBaixaPresPres,
+        FechaForcaFechaPres,
+      },
+
+      // DOSAGEM, INJEÇÃO E RECALQUE
+      dosagemInjecaoRecalque: {
+        dosagem: {
+          dosagem1: { VEL: dosagem1VEL, PRES: dosagem1PRES, CtP: dosagem1CONPRES, POS: dosagem1POS },
+          dosagem2: { VEL: dosagem2VEL, PRES: dosagem2PRES, CtP: dosagem2CONPRES, POS: dosagem2POS },
+          dosagem3: { VEL: dosagem3VEL, PRES: dosagem3PRES, CtP: dosagem3CONPRES, POS: dosagem3POS },
+          retDosagem,
+        },
+        injecao: {
+          tipoInjecao,
+          injecao1: { VEL: injecao1VEL, PRES: injecao1PRES, POS: injecao1POS },
+          injecao2: { VEL: injecao2VEL, PRES: injecao2PRES, POS: injecao2POS },
+          injecao3: { VEL: injecao3VEL, PRES: injecao3PRES, POS: injecao3POS },
+          injecao4: { VEL: injecao4VEL, PRES: injecao4PRES, POS: injecao4POS },
+          InjecaoPressaoMax,
+          InjecaoTempoProgramado,
+          injecaoComutacao,
+          InjecaoLeakage,
+          injecaoColchao,
+        },
+        recalque: {
+          recalqueTipo,
+          recalque1: { VEL: recalque1VEL, PRES: recalque1PRES, TEMP: recalque1TEMP },
+          recalque2: { VEL: recalque2VEL, PRES: recalque2PRES, TEMP: recalque2TEMP },
+          recalque3: { VEL: recalque3VEL, PRES: recalque3PRES, TEMP: recalque3TEMP },
+          recalque4: { VEL: recalque4VEL, PRES: recalque4PRES, TEMP: recalque4TEMP },
+          obsRecalque,
+        },
+      },
+
+      // DESCOMPRESSÃO
+      descompressao: {
+        descDianteiraSimNao,
+        descTraseiraSimNao,
+        descTraseira: { VEL: descTraseiraVEL, PRES: descTraseiraPRES, POS: descTraseiraPOS },
+      },
+
+      // EXTRAÇÃO MECÂNICA
+      extracaoMecanica: {
+        extracaoTipo,
+        extracaoRepetir,
+        extracaoRepetirQte,
+        extracaoPausa,
+        extracaoAux,
+        avancos: {
+          avancos1: { VEL: extAvanco1VEL, PRES: extAvanco1PRES, POS: extAvanco1POS },
+          avancos2: { VEL: extAvanco2VEL, PRES: extAvanco2PRES, POS: extAvanco2POS },
+        },
+        retornos: {
+          retorno1: { VEL: extRetorno1VEL, PRES: extRetorno1PRES, POS: extRetorno1POS },
+          retorno2: { VEL: extRetorno2VEL, PRES: extRetorno2PRES, POS: extRetorno2POS },
+        },
+        obsExtracaoMecanica,
+      },
+
+      // PNEUMÁTICO
+      pneumatico: {
+        ar1: { Tipo: extPneu1Tipo, Posicao: extPneu1POS, Atraso: extPneu1RET, Tempo: extPneu1TEMP },
+        ar2: { Tipo: extPneu2Tipo, Posicao: extPneu2POS, Atraso: extPneu2RET, Tempo: extPneu2TEMP },
+        ar3: { Tipo: extPneu3Tipo, Posicao: extPneu3POS, Atraso: extPneu3RET, Tempo: extPneu3TEMP },
+        ar4: { Tipo: extPneu4Tipo, Posicao: extPneu4POS, Atraso: extPneu4RET, Tempo: extPneu4TEMP },
+        ar5: { Tipo: extPneu5Tipo, Posicao: extPneu5POS, Atraso: extPneu5RET, Tempo: extPneu5TEMP },
+        ar6: { Tipo: extPneu6Tipo, Posicao: extPneu6POS, Atraso: extPneu6RET, Tempo: extPneu6TEMP },
+      },
+
+      // MACHOS - AVANÇOS
+      machosAvancos: {
+        macho1: { Modo: MachoAvanco1Modo, Cond: MachoAvanco1Cond, Curso: MachoAvanco1Curso, VEL: MachoAvanco1VEL, PRES: MachoAvanco1PRES, TEMP: MachoAvanco1TEMP },
+        macho2: { Modo: MachoAvanco2Modo, Cond: MachoAvanco2Cond, Curso: MachoAvanco2Curso, VEL: MachoAvanco2VEL, PRES: MachoAvanco2PRES, TEMP: MachoAvanco2TEMP },
+        macho3: { Modo: MachoAvanco3Modo, Cond: MachoAvanco3Cond, Curso: MachoAvanco3Curso, VEL: MachoAvanco3VEL, PRES: MachoAvanco3PRES, TEMP: MachoAvanco3TEMP },
+        macho4: { Modo: MachoAvanco4Modo, Cond: MachoAvanco4Cond, Curso: MachoAvanco4Curso, VEL: MachoAvanco4VEL, PRES: MachoAvanco4PRES, TEMP: MachoAvanco4TEMP },
+        macho5: { Modo: MachoAvanco5Modo, Cond: MachoAvanco5Cond, Curso: MachoAvanco5Curso, VEL: MachoAvanco5VEL, PRES: MachoAvanco5PRES, TEMP: MachoAvanco5TEMP },
+        macho6: { Modo: MachoAvanco6Modo, Cond: MachoAvanco6Cond, Curso: MachoAvanco6Curso, VEL: MachoAvanco6VEL, PRES: MachoAvanco6PRES, TEMP: MachoAvanco6TEMP },
+        macho7: { Modo: MachoAvanco7Modo, Cond: MachoAvanco7Cond, Curso: MachoAvanco7Curso, VEL: MachoAvanco7VEL, PRES: MachoAvanco7PRES, TEMP: MachoAvanco7TEMP },
+        macho8: { Modo: MachoAvanco8Modo, Cond: MachoAvanco8Cond, Curso: MachoAvanco8Curso, VEL: MachoAvanco8VEL, PRES: MachoAvanco8PRES, TEMP: MachoAvanco8TEMP },
+      },
+
+      // MACHOS - RETORNOS
+      machosRetornos: {
+        macho1: { Modo: MachoRetorno1Modo, Cond: MachoRetorno1Cond, Curso: MachoRetorno1Curso, VEL: MachoRetorno1VEL, PRES: MachoRetorno1PRES, TEMP: MachoRetorno1TEMP },
+        macho2: { Modo: MachoRetorno2Modo, Cond: MachoRetorno2Cond, Curso: MachoRetorno2Curso, VEL: MachoRetorno2VEL, PRES: MachoRetorno2PRES, TEMP: MachoRetorno2TEMP },
+        macho3: { Modo: MachoRetorno3Modo, Cond: MachoRetorno3Cond, Curso: MachoRetorno3Curso, VEL: MachoRetorno3VEL, PRES: MachoRetorno3PRES, TEMP: MachoRetorno3TEMP },
+        macho4: { Modo: MachoRetorno4Modo, Cond: MachoRetorno4Cond, Curso: MachoRetorno4Curso, VEL: MachoRetorno4VEL, PRES: MachoRetorno4PRES, TEMP: MachoRetorno4TEMP },
+        macho5: { Modo: MachoRetorno5Modo, Cond: MachoRetorno5Cond, Curso: MachoRetorno5Curso, VEL: MachoRetorno5VEL, PRES: MachoRetorno5PRES, TEMP: MachoRetorno5TEMP },
+        macho6: { Modo: MachoRetorno6Modo, Cond: MachoRetorno6Cond, Curso: MachoRetorno6Curso, VEL: MachoRetorno6VEL, PRES: MachoRetorno6PRES, TEMP: MachoRetorno6TEMP },
+        macho7: { Modo: MachoRetorno7Modo, Cond: MachoRetorno7Cond, Curso: MachoRetorno7Curso, VEL: MachoRetorno7VEL, PRES: MachoRetorno7PRES, TEMP: MachoRetorno7TEMP },
+        macho8: { Modo: MachoRetorno8Modo, Cond: MachoRetorno8Cond, Curso: MachoRetorno8Curso, VEL: MachoRetorno8VEL, PRES: MachoRetorno8PRES, TEMP: MachoRetorno8TEMP },
+      },
+
+      // OBSERVAÇÕES E ANOTAÇÕES
+      observacoes: {
+        obsMacho,
+        obsProcMontagem,
+        obsOptecnica,
+        obsQualidade,
+        instrucoes,
+        consideracoes,
+      },
+
+      // ATRASOS
+      atrasos: {
+        MachoAvancoAtraso,
+        MachoRetornoAtraso,
+      },
+
+      // RETORNOS E CONTROLES
+      controlesRetorno: {
+        retSaidaExtracao,
+        baixaPressao,
+        retFimAltaPressao,
+        retFimFechamento,
+        retExtrator,
+        retRecuoBico,
+        retAvancoBico,
+        retPurga,
+        aberturaLentaPorta,
+        portaAberta,
+      },
+
+      // Alarmes e configurações adicionais
+      alarmeReciclo: {
+        alarmeRetDosagem,
+        Reciclo,
+        descAnteDosagem,
+      },
+
+      // Configurações do friso
+      configFriso: {
+        ALPRFIABPRES,
+        sicExtraPres,
+        FecAuxPres,
+      },
+
+      // Timestamp
+      dataCriacao: new Date().toISOString(),
+    }
+    setFicha(fichaSalva)
+    console.log('Ficha Salva:', fichaSalva)
+    return fichaSalva
+  }
+
   return (
     <>
 
@@ -385,20 +624,20 @@ const [maquinas,setMaquinas] = useState([
             <div className='coluna'>
               <div className='campos-container'>
 
-                <div className="field-p"><label>Cav</label><input value={cavidades} type='text' /></div>
-                <div className="field-p"><label>Ciclo</label><input value={tCiclo} type='text' /></div>
-                <div className="field-p"><label>PH</label><input value={PH} type='text' /></div>
-                <div className="field-p"><label>Peso</label><input value={pesoIdeal} type='text' /></div>
+                <div className="field-p"><label>Cav</label><input value={cavidades} onChange={(e) => setcavidades(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Ciclo</label><input value={tCiclo} onChange={(e) => settCiclo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>PH</label><input value={PH} onChange={(e) => setPH(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Peso</label><input value={pesoIdeal} onChange={(e) => setpesoIdeal(e.target.value)} type='text' /></div>
                 <div className="field-p"><label>Padrão</label><input value={""} type='text' /></div>
                 <div className="field-p"><label>Embalagem</label><input value={""} type='text' /></div>
-                <div className="field-p"><label>T Dos</label><input value={tDosagem} type='text' /></div>
-                <div className="field-p"><label>T Inj</label><input value={tInjecao} type='text' /></div>
-                <div className="field-p"><label>T Ext</label><input value={tExtracao} type='text' /></div>
-                <div className="field-p"><label>T Abe</label><input value={tAbertura} type='text' /></div>
-                <div className="field-p"><label>T Fech</label><input value={tFechamento} type='text' /></div>
-                <div className="field"><label>Elaborado por:</label><input value={ElaboraPor} type='text' /></div>
-                <div className="field-p"><label>Aprovado por:</label><input value={AprovadoPor} type='text' /></div>
-                <div className="field-p"><label>Aprovado em:</label><input value={data} type='text' /></div>
+                <div className="field-p"><label>T Dos</label><input value={tDosagem} onChange={(e) => settDosagem(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Inj</label><input value={tInjecao} onChange={(e) => settInjecao(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Ext</label><input value={tExtracao} onChange={(e) => settExtracao(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Abe</label><input value={tAbertura} onChange={(e) => settAbertura(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Fech</label><input value={tFechamento} onChange={(e) => settFechamento(e.target.value)} type='text' /></div>
+                <div className="field"><label>Elaborado por:</label><input value={ElaboraPor} onChange={(e) => setElaboraPor(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Aprovado por:</label><input value={AprovadoPor} onChange={(e) => setAprovadoPor(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Aprovado em:</label><input value={data} onChange={(e) => setdata(e.target.value)} type='text' /></div>
               </div>
             </div>
           </div>
@@ -409,7 +648,7 @@ const [maquinas,setMaquinas] = useState([
         <Section title="MATÉRIA PRIMA">
           <div>
             <label>Matéria Prima</label>
-            <textarea className='txt-area' value={materiaPrima} placeholder='Informações de Matéria Prima' />
+            <textarea className='txt-area' value={materiaPrima} onChange={(e) => setmateriaPrima(e.target.value)} placeholder='Informações de Matéria Prima' />
           </div>
 
         </Section>
@@ -419,128 +658,128 @@ const [maquinas,setMaquinas] = useState([
           <div className='campos-container'>
             <div className="field-p">
               <label>Bico:</label>
-              <input type="text" value={bico} pattern="[Pp]?[0-9]*" />
+              <input type="text" value={bico} onChange={(e) => setbico(e.target.value)} pattern="[Pp]?[0-9]*" />
             </div>
 
             <div className="field-p">
               <label>Z1:</label>
-              <input value={z1} type="number" />
+              <input value={z1} onChange={(e) => setz1(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>Z2:</label>
-              <input value={z2} type="number" />
+              <input value={z2} onChange={(e) => setz2(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>Z3:</label>
-              <input value={z3} type="number" />
+              <input value={z3} onChange={(e) => setz3(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>Z4:</label>
-              <input value={z4} type="number" />
+              <input value={z4} onChange={(e) => setz4(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>Z5:</label>
-              <input value={z5} type="number" />
+              <input value={z5} onChange={(e) => setz5(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>Z6:</label>
-              <input value={z6} type="number" />
+              <input value={z6} onChange={(e) => setz6(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>Z7:</label>
-              <input value={z7} type="number" />
+              <input value={z7} onChange={(e) => setz7(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>Z8:</label>
-              <input value={z8} type="number" />
+              <input value={z8} onChange={(e) => setz8(e.target.value)} type="number" />
             </div>
 
             <div className='pulaLinha'></div>
 
             <div className="field-p">
               <label>CQ 1:</label>
-              <input value={c1} type="number" />
+              <input value={c1} onChange={(e) => setc1(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 2:</label>
-              <input value={c2} type="number" />
+              <input value={c2} onChange={(e) => setc2(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 3:</label>
-              <input value={c3} type="number" />
+              <input value={c3} onChange={(e) => setc3(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 4:</label>
-              <input value={c4} type="number" />
+              <input value={c4} onChange={(e) => setc4(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 5:</label>
-              <input value={c5} type="number" />
+              <input value={c5} onChange={(e) => setc5(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 6:</label>
-              <input value={c6} type="number" />
+              <input value={c6} onChange={(e) => setc6(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 7:</label>
-              <input value={c7} type="number" />
+              <input value={c7} onChange={(e) => setc7(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 8:</label>
-              <input value={c8} type="number" />
+              <input value={c8} onChange={(e) => setc8(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 9:</label>
-              <input value={c9} type="number" />
+              <input value={c9} onChange={(e) => setc9(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 10:</label>
-              <input value={c10} type="number" />
+              <input value={c10} onChange={(e) => setc10(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 11:</label>
-              <input value={c11} type="number" />
+              <input value={c11} onChange={(e) => setc11(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 12:</label>
-              <input value={c12} type="number" />
+              <input value={c12} onChange={(e) => setc12(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 13:</label>
-              <input value={c13} type="number" />
+              <input value={c13} onChange={(e) => setc13(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 14:</label>
-              <input value={c14} type="number" />
+              <input value={c14} onChange={(e) => setc14(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 15:</label>
-              <input value={c15} type="number" />
+              <input value={c15} onChange={(e) => setc15(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 16:</label>
-              <input value={c16} type="number" />
+              <input value={c16} onChange={(e) => setc16(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 17:</label>
-              <input value={c17} type="number" />
+              <input value={c17} onChange={(e) => setc17(e.target.value)} type="number" />
             </div>
             <div className="field-p">
               <label>CQ 18:</label>
-              <input value={c18} type="number" />
+              <input value={c18} onChange={(e) => setc18(e.target.value)} type="number" />
             </div>
           </div>
 
           <div className='field'>
             <label>Observações</label>
-            <textarea className="txt-area" value={obsTemperaturas} placeholder='Observações a respeito da temperatura' />
+            <textarea className="txt-area" value={obsTemperaturas} onChange={(e) => setobsTemperaturas(e.target.value)} placeholder='Observações a respeito da temperatura' />
           </div>
 
 
         </Section>
         <Section title="REFRIGERÇÃO">
           <label>Água</label>
-          <input type="text" value={refrigeracao} list="tiposAgua" />
+          <input type="text" value={refrigeracao} onChange={(e) => setrefrigeracao(e.target.value)} list="tiposAgua" />
           <datalist id='tiposAgua'>
             <option value="1">Normal</option>
             <option value="2">Refrigerada</option>
@@ -549,7 +788,7 @@ const [maquinas,setMaquinas] = useState([
 
           <div className='field'>
             <label>Observações</label>
-            <textarea className="txt-area" value={obsRefrigeracao} placeholder='Observações a respeito da refrigeração' />
+            <textarea className="txt-area" value={obsRefrigeracao} onChange={(e) => setobsRefrigeracao(e.target.value)} placeholder='Observações a respeito da refrigeração' />
           </div>
 
         </Section>
@@ -564,33 +803,33 @@ const [maquinas,setMaquinas] = useState([
                 <div className='pulaLinha'></div>
 
                 {/* Linha 1 */}
-                <div className="field-p"><label>Vel 1</label><input value={ab1VEL} type='text' /></div>
-                <div className="field-p"><label>Pres 1</label><input value={ab1PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 1</label><input value={ab1POS} type='text' /></div>
+                <div className="field-p"><label>Vel 1</label><input value={ab1VEL} onChange={(e) => setab1VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 1</label><input value={ab1PRES} onChange={(e) => setab1PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 1</label><input value={ab1POS} onChange={(e) => setab1POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-p"><label>Vel 2</label><input value={ab2VEL} type='text' /></div>
-                <div className="field-p"><label>Pres 2</label><input value={ab2PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 2</label><input value={ab2POS} type='text' /></div>
+                <div className="field-p"><label>Vel 2</label><input value={ab2VEL} onChange={(e) => setab2VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 2</label><input value={ab2PRES} onChange={(e) => setab2PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 2</label><input value={ab2POS} onChange={(e) => setab2POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 3 */}
-                <div className="field-p"><label>Vel 3</label><input value={ab3VEL} type='text' /></div>
-                <div className="field-p"><label>Pres 3</label><input value={ab3PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 3</label><input value={ab3POS} type='text' /></div>
+                <div className="field-p"><label>Vel 3</label><input value={ab3VEL} onChange={(e) => setab3VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 3</label><input value={ab3PRES} onChange={(e) => setab3PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 3</label><input value={ab3POS} onChange={(e) => setab3POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 4 */}
-                <div className="field-p"><label>Vel 4</label><input value={ab4VEL} type='text' /></div>
-                <div className="field-p"><label>Pres 4</label><input value={ab4PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 4</label><input value={ab4POS} type='text' /></div>
+                <div className="field-p"><label>Vel 4</label><input value={ab4VEL} onChange={(e) => setab4VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 4</label><input value={ab4PRES} onChange={(e) => setab4PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 4</label><input value={ab4POS} onChange={(e) => setab4POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 5 */}
-                <div className="field-p"><label>Vel 5</label><input value={abFimVEL} type='text' /></div>
-                <div className="field-p"><label>Pres 5</label><input value={abFimPRES} type='text' /></div>
-                <div className="field-p"><label>Pos 5</label><input value={abFimPOS} type='text' /></div>
+                <div className="field-p"><label>Vel 5</label><input value={abFimVEL} onChange={(e) => setabFimVEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 5</label><input value={abFimPRES} onChange={(e) => setabFimPRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 5</label><input value={abFimPOS} onChange={(e) => setabFimPOS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
               </div>
             </div>
@@ -602,31 +841,31 @@ const [maquinas,setMaquinas] = useState([
                 <div className='pulaLinha'></div>
 
                 {/* Linha 1 */}
-                <div className="field-p"><label>Vel 1</label><input value={fecha1VEL} type='text' /></div>
-                <div className="field-p"><label>Pres 1</label><input value={fecha1PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 1</label><input value={fecha1POS} type='text' /></div>
+                <div className="field-p"><label>Vel 1</label><input value={fecha1VEL} onChange={(e) => setfecha1VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 1</label><input value={fecha1PRES} onChange={(e) => setfecha1PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 1</label><input value={fecha1POS} onChange={(e) => setfecha1POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-p"><label>Vel 2</label><input value={fecha2VEL} type='text' /></div>
-                <div className="field-p"><label>Pres 2</label><input value={fecha2PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 2</label><input value={fecha2POS} type='text' /></div>
+                <div className="field-p"><label>Vel 2</label><input value={fecha2VEL} onChange={(e) => setfecha2VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 2</label><input value={fecha2PRES} onChange={(e) => setfecha2PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 2</label><input value={fecha2POS} onChange={(e) => setfecha2POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 3 */}
-                <div className="field-p"><label>Vel 3</label><input value={fecha3VEL} type='text' /></div>
-                <div className="field-p"><label>Pres 3</label><input value={fecha3PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 3</label><input value={fecha3POS} type='text' /></div>
+                <div className="field-p"><label>Vel 3</label><input value={fecha3VEL} onChange={(e) => setfecha3VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 3</label><input value={fecha3PRES} onChange={(e) => setfecha3PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 3</label><input value={fecha3POS} onChange={(e) => setfecha3POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
                 {/* Linha 4 */}
-                <div className="field-p"><label>Vel 4</label><input value={fecha4VEL} type='text' /></div>
-                <div className="field-p"><label>Pres 4</label><input value={fecha4PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 4</label><input value={fecha4POS} type='text' /></div>
+                <div className="field-p"><label>Vel 4</label><input value={fecha4VEL} onChange={(e) => setfecha4VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 4</label><input value={fecha4PRES} onChange={(e) => setfecha4PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 4</label><input value={fecha4POS} onChange={(e) => setfecha4POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
                 {/* Linha 5 */}
-                <div className="field-p"><label>Vel 5</label><input value={fechaFimVEL} type='text' /></div>
-                <div className="field-p"><label>Pres 5</label><input value={fechaFimPRES} type='text' /></div>
-                <div className="field-p"><label>Pos 5</label><input value={fechaFimPOS} type='text' /></div>
+                <div className="field-p"><label>Vel 5</label><input value={fechaFimVEL} onChange={(e) => setfechaFimVEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 5</label><input value={fechaFimPRES} onChange={(e) => setfechaFimPRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 5</label><input value={fechaFimPOS} onChange={(e) => setfechaFimPOS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
 
@@ -638,7 +877,7 @@ const [maquinas,setMaquinas] = useState([
           </div>
 
           <label>Observações</label>
-          <textarea className="txt-area" value={obsAbreFecha} placeholder='Observações a respeito da abertura e Abertura e Fechamento' />
+          <textarea className="txt-area" value={obsAbreFecha} onChange={(e) => setobsAbreFecha(e.target.value)} placeholder='Observações a respeito da abertura e Abertura e Fechamento' />
 
         </Section>
 
@@ -652,24 +891,24 @@ const [maquinas,setMaquinas] = useState([
                 <div className='pulaLinha'></div>
 
                 {/* Linha 1 */}
-                <div className="field-pp"><label>Vel 1</label><input value={dosagem1VEL} type='text' /></div>
-                <div className="field-pp"><label>Pres 1</label><input value={dosagem1PRES} type='text' /></div>
-                <div className="field-pp"><label>CtP 1</label><input value={dosagem1CONPRES} type='text' /></div>
-                <div className="field-pp"><label>Pos 1</label><input value={dosagem1POS} type='text' /></div>
+                <div className="field-pp"><label>Vel 1</label><input value={dosagem1VEL} onChange={(e) => setdosagem1VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pres 1</label><input value={dosagem1PRES} onChange={(e) => setdosagem1PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>CtP 1</label><input value={dosagem1CONPRES} onChange={(e) => setdosagem1CONPRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pos 1</label><input value={dosagem1POS} onChange={(e) => setdosagem1POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Vel 2</label><input value={dosagem2VEL} type='text' /></div>
-                <div className="field-pp"><label>Pres 2</label><input value={dosagem2PRES} type='text' /></div>
-                <div className="field-pp"><label>CtP 2</label><input value={dosagem2CONPRES} type='text' /></div>
-                <div className="field-pp"><label>Pos 2</label><input value={dosagem2POS} type='text' /></div>
+                <div className="field-pp"><label>Vel 2</label><input value={dosagem2VEL} onChange={(e) => setdosagem2VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pres 2</label><input value={dosagem2PRES} onChange={(e) => setdosagem2PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>CtP 2</label><input value={dosagem2CONPRES} onChange={(e) => setdosagem2CONPRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pos 2</label><input value={dosagem2POS} onChange={(e) => setdosagem2POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 3 */}
-                <div className="field-pp"><label>Vel 3</label><input value={dosagem3VEL} type='text' /></div>
-                <div className="field-pp"><label>Pres 3</label><input value={dosagem3PRES} type='text' /></div>
-                <div className="field-pp"><label>CtP 3</label><input value={dosagem3CONPRES} type='text' /></div>
-                <div className="field-pp"><label>Pos 3</label><input value={dosagem3POS} type='text' /></div>
+                <div className="field-pp"><label>Vel 3</label><input value={dosagem3VEL} onChange={(e) => setdosagem3VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pres 3</label><input value={dosagem3PRES} onChange={(e) => setdosagem3PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>CtP 3</label><input value={dosagem3CONPRES} onChange={(e) => setdosagem3CONPRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pos 3</label><input value={dosagem3POS} onChange={(e) => setdosagem3POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
               </div>
@@ -682,22 +921,22 @@ const [maquinas,setMaquinas] = useState([
                 <div className='pulaLinha'></div>
 
                 {/* Linha 1 */}
-                <div className="field-pp"><label>Vel 1</label><input value={injecao1VEL} type='text' /></div>
-                <div className="field-pp"><label>Pres 1</label><input value={injecao1PRES} type='text' /></div>
-                <div className="field-pp"><label>Pos 1</label><input value={injecao1POS} type='text' /></div>
+                <div className="field-pp"><label>Vel 1</label><input value={injecao1VEL} onChange={(e) => setinjecao1VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pres 1</label><input value={injecao1PRES} onChange={(e) => setinjecao1PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pos 1</label><input value={injecao1POS} onChange={(e) => setinjecao1POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Vel 2</label><input value={injecao2VEL} type='text' /></div>
-                <div className="field-pp"><label>Pres 2</label><input value={injecao2PRES} type='text' /></div>
-                <div className="field-pp"><label>Pos 2</label><input value={injecao2POS} type='text' /></div>
+                <div className="field-pp"><label>Vel 2</label><input value={injecao2VEL} onChange={(e) => setinjecao2VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pres 2</label><input value={injecao2PRES} onChange={(e) => setinjecao2PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pos 2</label><input value={injecao2POS} onChange={(e) => setinjecao2POS(e.target.value)} type='text' /></div>
 
                 <div className='pulaLinha'></div>
 
                 {/* Linha 3 */}
-                <div className="field-pp"><label>Vel 3</label><input value={injecao3VEL} type='text' /></div>
-                <div className="field-pp"><label>Pres 3</label><input value={injecao3PRES} type='text' /></div>
-                <div className="field-pp"><label>Pos 3</label><input value={injecao3POS} type='text' /></div>
+                <div className="field-pp"><label>Vel 3</label><input value={injecao3VEL} onChange={(e) => setinjecao3VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pres 3</label><input value={injecao3PRES} onChange={(e) => setinjecao3PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pos 3</label><input value={injecao3POS} onChange={(e) => setinjecao3POS(e.target.value)} type='text' /></div>
 
                 <div className='pulaLinha'></div>
               </div>
@@ -709,26 +948,26 @@ const [maquinas,setMaquinas] = useState([
                 <div className="field"><strong>RECALQUE</strong></div>
                 <div className='pulaLinha'></div>
                 {/* comutação */}
-                <div className="field-p"><label>Comutação</label><input value={injecaoComutacao} type='text' /></div>
-                <div className="field-p"><label>Leakage</label><input value={InjecaoLeakage} type='text' /></div>
+                <div className="field-p"><label>Comutação</label><input value={injecaoComutacao} onChange={(e) => setinjecaoComutacao(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Leakage</label><input value={InjecaoLeakage} onChange={(e) => setInjecaoLeakage(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 1 */}
-                <div className="field-pp"><label>Vel 1</label><input value={recalque1VEL} type='text' /></div>
-                <div className="field-pp"><label>Pres 1</label><input value={recalque2PRES} type='text' /></div>
-                <div className="field-pp"><label>Temp 1</label><input value={recalque1TEMP} type='text' /></div>
+                <div className="field-pp"><label>Vel 1</label><input value={recalque1VEL} onChange={(e) => setrecalque1VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pres 1</label><input value={recalque2PRES} onChange={(e) => setrecalque2PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Temp 1</label><input value={recalque1TEMP} onChange={(e) => setrecalque1TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Vel 2</label><input value={recalque2VEL} type='text' /></div>
-                <div className="field-pp"><label>Pres 2</label><input value={recalque2PRES} type='text' /></div>
-                <div className="field-pp"><label>Temp 2</label><input value={recalque2TEMP} type='text' /></div>
+                <div className="field-pp"><label>Vel 2</label><input value={recalque2VEL} onChange={(e) => setrecalque2VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pres 2</label><input value={recalque2PRES} onChange={(e) => setrecalque2PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Temp 2</label><input value={recalque2TEMP} onChange={(e) => setrecalque2TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 3 */}
-                <div className="field-pp"><label>Vel 3</label><input value={recalque3VEL} type='text' /></div>
-                <div className="field-pp"><label>Pres 3</label><input value={recalque3PRES} type='text' /></div>
-                <div className="field-pp"><label>Temp 3</label><input value={recalque3TEMP} type='text' /></div>
+                <div className="field-pp"><label>Vel 3</label><input value={recalque3VEL} onChange={(e) => setrecalque3VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Pres 3</label><input value={recalque3PRES} onChange={(e) => setrecalque3PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Temp 3</label><input value={recalque3TEMP} onChange={(e) => setrecalque3TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
               </div>
             </div>
@@ -760,16 +999,16 @@ const [maquinas,setMaquinas] = useState([
             </div>
           </div>
           <label>Observações</label>
-          <textarea className="txt-area" value={obsRecalque} placeholder='Observações a respeito dosagem, injeção, recalque e descompressão' />
+          <textarea className="txt-area" value={obsRecalque} onChange={(e) => setobsRecalque(e.target.value)} placeholder='Observações a respeito dosagem, injeção, recalque e descompressão' />
         </Section>
 
         <Section title="EXTRAÇÃO MECANICA">
           {/* AVANÇO EXTRATOR */}
 
           {/* Linha 1 */}
-          <div className="field"><label>Tipo Extração</label><input value={extracaoTipo} type='text' /></div>
-          <div className="field"><label>NRepetições</label><input type='text' /></div>
-          <div className="field"><label>Pausa Ext</label><input type='text' /></div>
+          <div className="field"><label>Tipo Extração</label><input value={extracaoTipo} onChange={(e) => setextracaoTipo(e.target.value)} type='text' /></div>
+          <div className="field"><label>NRepetições</label><input onChange={(e) => setextracaoRepetirQte(e.target.value)} type='text' /></div>
+          <div className="field"><label>Pausa Ext</label><input onChange={(e) => setextracaoPausa(e.target.value)} type='text' /></div>
           <div className='pulaLinha'></div>
 
           <div className='quadroMaior'>
@@ -779,15 +1018,15 @@ const [maquinas,setMaquinas] = useState([
                 <div className="field"><strong>AVANÇO</strong></div>
                 <div className='pulaLinha'></div>
                 {/* Linha 2 */}
-                <div className="field-p"><label>Vel 1</label><input value={extAvanco1POS} type='text' /></div>
-                <div className="field-p"><label>Pres 1</label><input value={extAvanco1PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 1</label><input value={extAvanco1POS} type='text' /></div>
+                <div className="field-p"><label>Vel 1</label><input value={extAvanco1VEL} onChange={(e) => setextAvanco1VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 1</label><input value={extAvanco1PRES} onChange={(e) => setextAvanco1PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 1</label><input value={extAvanco1POS} onChange={(e) => setextAvanco1POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 3 */}
-                <div className="field-p"><label>Vel 2</label><input value={extAvanco2VEL} type='text' /></div>
-                <div className="field-p"><label>Pres 2</label><input value={extAvanco2PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 2</label><input value={extAvanco2POS} type='text' /></div>
+                <div className="field-p"><label>Vel 2</label><input value={extAvanco2VEL} onChange={(e) => setextAvanco2VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 2</label><input value={extAvanco2PRES} onChange={(e) => setextAvanco2PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 2</label><input value={extAvanco2POS} onChange={(e) => setextAvanco2POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
               </div>
@@ -800,15 +1039,15 @@ const [maquinas,setMaquinas] = useState([
                 <div className='pulaLinha'></div>
 
                 {/* Linha 1 */}
-                <div className="field-p"><label>Vel 1</label><input value={extRetorno1VEL} type='text' /></div>
-                <div className="field-p"><label>Pres 1</label><input value={extRetorno1PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 1</label><input value={extRetorno1POS} type='text' /></div>
+                <div className="field-p"><label>Vel 1</label><input value={extRetorno1VEL} onChange={(e) => setextRetorno1VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 1</label><input value={extRetorno1PRES} onChange={(e) => setextRetorno1PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 1</label><input value={extRetorno1POS} onChange={(e) => setextRetorno1POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-p"><label>Vel 2</label><input value={extRetorno2VEL} type='text' /></div>
-                <div className="field-p"><label>Pres 2</label><input value={extRetorno2PRES} type='text' /></div>
-                <div className="field-p"><label>Pos 2</label><input value={extRetorno2POS} type='text' /></div>
+                <div className="field-p"><label>Vel 2</label><input value={extRetorno2VEL} onChange={(e) => setextRetorno2VEL(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pres 2</label><input value={extRetorno2PRES} onChange={(e) => setextRetorno2PRES(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Pos 2</label><input value={extRetorno2POS} onChange={(e) => setextRetorno2POS(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
               </div>
@@ -819,7 +1058,7 @@ const [maquinas,setMaquinas] = useState([
           </div>
 
           <label>Observações</label>
-          <textarea className="txt-area" placeholder='Observações ' value={obsExtracaoMecanica} />
+          <textarea className="txt-area" placeholder='Observações ' value={obsExtracaoMecanica} onChange={(e) => setobsExtracaoMecanica(e.target.value)} />
 
         </Section>
 
@@ -829,38 +1068,38 @@ const [maquinas,setMaquinas] = useState([
             <div className='Coluna'>
               <div className='campos-container'>
                 <div>Ar 1</div>
-                <div className="field-p"><label>Tipo 1</label><input value={extPneu1Tipo} type='text' /></div>
-                <div className="field-p"><label>Posicao 1</label><input value={extPneu1POS} type='text' /></div>
-                <div className="field-p"><label>Atraso 1</label><input value={extPneu1RET} type='text' /></div>
-                <div className="field-p"><label>Tempo 2</label><input value={extPneu1TEMP} type='text' /></div>
+                <div className="field-p"><label>Tipo 1</label><input value={extPneu1Tipo} onChange={(e) => setextPneu1Tipo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Posicao 1</label><input value={extPneu1POS} onChange={(e) => setextPneu1POS(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Atraso 1</label><input value={extPneu1RET} onChange={(e) => setextPneu1RET(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Tempo 2</label><input value={extPneu1TEMP} onChange={(e) => setextPneu1TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 <div>Ar 2</div>
-                <div className="field-p"><label>Tipo 2</label><input value={extPneu2Tipo} type='text' /></div>
-                <div className="field-p"><label>Posicao 2</label><input value={extPneu2POS} type='text' /></div>
-                <div className="field-p"><label>Atraso 2</label><input value={extPneu2RET} type='text' /></div>
-                <div className="field-p"><label>Tempo 2</label><input value={extPneu2TEMP} type='text' /></div>
+                <div className="field-p"><label>Tipo 2</label><input value={extPneu2Tipo} onChange={(e) => setextPneu2Tipo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Posicao 2</label><input value={extPneu2POS} onChange={(e) => setextPneu2POS(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Atraso 2</label><input value={extPneu2RET} onChange={(e) => setextPneu2RET(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Tempo 2</label><input value={extPneu2TEMP} onChange={(e) => setextPneu2TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 <div>Ar 3</div>
-                <div className="field-p"><label>Tipo 3</label><input value={extPneu3Tipo} type='text' /></div>
-                <div className="field-p"><label>Posicao 3</label><input value={extPneu3POS} type='text' /></div>
-                <div className="field-p"><label>Atraso 3</label><input value={extPneu3RET} type='text' /></div>
-                <div className="field-p"><label>Tempo 3</label><input value={extPneu3TEMP} type='text' /></div>
+                <div className="field-p"><label>Tipo 3</label><input value={extPneu3Tipo} onChange={(e) => setextPneu3Tipo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Posicao 3</label><input value={extPneu3POS} onChange={(e) => setextPneu3POS(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Atraso 3</label><input value={extPneu3RET} onChange={(e) => setextPneu3RET(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Tempo 3</label><input value={extPneu3TEMP} onChange={(e) => setextPneu3TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 <div>Ar 4</div>
-                <div className="field-p"><label>Tipo 4</label><input value={extPneu4Tipo} type='text' /></div>
-                <div className="field-p"><label>Posicao 4</label><input value={extPneu4POS} type='text' /></div>
-                <div className="field-p"><label>Atraso 4</label><input value={extPneu4RET} type='text' /></div>
-                <div className="field-p"><label>Tempo 4</label><input value={extPneu4TEMP} type='text' /></div>
+                <div className="field-p"><label>Tipo 4</label><input value={extPneu4Tipo} onChange={(e) => setextPneu4Tipo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Posicao 4</label><input value={extPneu4POS} onChange={(e) => setextPneu4POS(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Atraso 4</label><input value={extPneu4RET} onChange={(e) => setextPneu4RET(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Tempo 4</label><input value={extPneu4TEMP} onChange={(e) => setextPneu4TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 <div>Ar 5</div>
-                <div className="field-p"><label>Tipo 5</label><input value={extPneu5Tipo} type='text' /></div>
-                <div className="field-p"><label>Posicao 5</label><input value={extPneu5POS} type='text' /></div>
-                <div className="field-p"><label>Atraso 5</label><input value={extPneu5RET} type='text' /></div>
-                <div className="field-p"><label>Tempo 5</label><input value={extPneu5TEMP} type='text' /></div>
+                <div className="field-p"><label>Tipo 5</label><input value={extPneu5Tipo} onChange={(e) => setextPneu5Tipo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Posicao 5</label><input value={extPneu5POS} onChange={(e) => setextPneu5POS(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Atraso 5</label><input value={extPneu5RET} onChange={(e) => setextPneu5RET(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Tempo 5</label><input value={extPneu5TEMP} onChange={(e) => setextPneu5TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
 
@@ -882,72 +1121,72 @@ const [maquinas,setMaquinas] = useState([
                 <div className='pulaLinha'></div>
 
                 {/* Linha 1 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco1Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 1</label><input value={MachoAvanco1Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 1</label><input value={MachoAvanco1Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 1</label><input value={MachoAvanco1VEL} type='text' /></div>
-                <div className="field-pp"><label>press 1</label><input value={MachoAvanco1PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 1</label><input value={MachoAvanco1TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco1Modo} onChange={(e) => setMachoAvanco1Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 1</label><input value={MachoAvanco1Cond} onChange={(e) => setMachoAvanco1Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 1</label><input value={MachoAvanco1Curso} onChange={(e) => setMachoAvanco1Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 1</label><input value={MachoAvanco1VEL} onChange={(e) => setMachoAvanco1VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 1</label><input value={MachoAvanco1PRES} onChange={(e) => setMachoAvanco1PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 1</label><input value={MachoAvanco1TEMP} onChange={(e) => setMachoAvanco1TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco2Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 2</label><input value={MachoAvanco2Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 2</label><input value={MachoAvanco2Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 2</label><input value={MachoAvanco2VEL} type='text' /></div>
-                <div className="field-pp"><label>press 2</label><input value={MachoAvanco2PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 2</label><input value={MachoAvanco2TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco2Modo} onChange={(e) => setMachoAvanco2Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 2</label><input value={MachoAvanco2Cond} onChange={(e) => setMachoAvanco2Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 2</label><input value={MachoAvanco2Curso} onChange={(e) => setMachoAvanco2Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 2</label><input value={MachoAvanco2VEL} onChange={(e) => setMachoAvanco2VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 2</label><input value={MachoAvanco2PRES} onChange={(e) => setMachoAvanco2PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 2</label><input value={MachoAvanco2TEMP} onChange={(e) => setMachoAvanco2TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco3Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 3</label><input value={MachoAvanco3Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 3</label><input value={MachoAvanco3Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 3</label><input value={MachoAvanco3VEL} type='text' /></div>
-                <div className="field-pp"><label>press 3</label><input value={MachoAvanco3PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 3</label><input value={MachoAvanco3TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco3Modo} onChange={(e) => setMachoAvanco3Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 3</label><input value={MachoAvanco3Cond} onChange={(e) => setMachoAvanco3Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 3</label><input value={MachoAvanco3Curso} onChange={(e) => setMachoAvanco3Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 3</label><input value={MachoAvanco3VEL} onChange={(e) => setMachoAvanco3VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 3</label><input value={MachoAvanco3PRES} onChange={(e) => setMachoAvanco3PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 3</label><input value={MachoAvanco3TEMP} onChange={(e) => setMachoAvanco3TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco4Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 4</label><input value={MachoAvanco4Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 4</label><input value={MachoAvanco4Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 4</label><input value={MachoAvanco4VEL} type='text' /></div>
-                <div className="field-pp"><label>press 4</label><input value={MachoAvanco4PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 4</label><input value={MachoAvanco4TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco4Modo} onChange={(e) => setMachoAvanco4Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 4</label><input value={MachoAvanco4Cond} onChange={(e) => setMachoAvanco4Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 4</label><input value={MachoAvanco4Curso} onChange={(e) => setMachoAvanco4Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 4</label><input value={MachoAvanco4VEL} onChange={(e) => setMachoAvanco4VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 4</label><input value={MachoAvanco4PRES} onChange={(e) => setMachoAvanco4PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 4</label><input value={MachoAvanco4TEMP} onChange={(e) => setMachoAvanco4TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco5Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 5</label><input value={MachoAvanco5Modo} type='text' /></div>
-                <div className="field-pp"><label>Cur 5</label><input value={MachoAvanco5Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 5</label><input value={MachoAvanco5VEL} type='text' /></div>
-                <div className="field-pp"><label>press 5</label><input value={MachoAvanco5PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 5</label><input value={MachoAvanco5TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco5Modo} onChange={(e) => setMachoAvanco5Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 5</label><input value={MachoAvanco5Cond} onChange={(e) => setMachoAvanco5Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 5</label><input value={MachoAvanco5Curso} onChange={(e) => setMachoAvanco5Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 5</label><input value={MachoAvanco5VEL} onChange={(e) => setMachoAvanco5VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 5</label><input value={MachoAvanco5PRES} onChange={(e) => setMachoAvanco5PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 5</label><input value={MachoAvanco5TEMP} onChange={(e) => setMachoAvanco5TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco6Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 6</label><input value={MachoAvanco6Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 6</label><input value={MachoAvanco6Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 6</label><input value={MachoAvanco6VEL} type='text' /></div>
-                <div className="field-pp"><label>press 6</label><input value={MachoAvanco6PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 6</label><input value={MachoAvanco6TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco6Modo} onChange={(e) => setMachoAvanco6Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 6</label><input value={MachoAvanco6Cond} onChange={(e) => setMachoAvanco6Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 6</label><input value={MachoAvanco6Curso} onChange={(e) => setMachoAvanco6Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 6</label><input value={MachoAvanco6VEL} onChange={(e) => setMachoAvanco6VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 6</label><input value={MachoAvanco6PRES} onChange={(e) => setMachoAvanco6PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 6</label><input value={MachoAvanco6TEMP} onChange={(e) => setMachoAvanco6TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* RETORNO  */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco7Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 7</label><input value={MachoAvanco7Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 7</label><input value={MachoAvanco7Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 7</label><input value={MachoAvanco7VEL} type='text' /></div>
-                <div className="field-pp"><label>press 7</label><input value={MachoAvanco7PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 7</label><input value={MachoAvanco7TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco7Modo} onChange={(e) => setMachoAvanco7Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 7</label><input value={MachoAvanco7Cond} onChange={(e) => setMachoAvanco7Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 7</label><input value={MachoAvanco7Curso} onChange={(e) => setMachoAvanco7Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 7</label><input value={MachoAvanco7VEL} onChange={(e) => setMachoAvanco7VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 7</label><input value={MachoAvanco7PRES} onChange={(e) => setMachoAvanco7PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 7</label><input value={MachoAvanco7TEMP} onChange={(e) => setMachoAvanco7TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco8Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 8</label><input value={MachoAvanco8Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 8</label><input value={MachoAvanco8Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 8</label><input value={MachoAvanco8VEL} type='text' /></div>
-                <div className="field-pp"><label>press 8</label><input value={MachoAvanco8PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 8</label><input value={MachoAvanco8TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoAvanco8Modo} onChange={(e) => setMachoAvanco8Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 8</label><input value={MachoAvanco8Cond} onChange={(e) => setMachoAvanco8Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 8</label><input value={MachoAvanco8Curso} onChange={(e) => setMachoAvanco8Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 8</label><input value={MachoAvanco8VEL} onChange={(e) => setMachoAvanco8VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 8</label><input value={MachoAvanco8PRES} onChange={(e) => setMachoAvanco8PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 8</label><input value={MachoAvanco8TEMP} onChange={(e) => setMachoAvanco8TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
 
@@ -961,72 +1200,72 @@ const [maquinas,setMaquinas] = useState([
                 <div className='pulaLinha'></div>
 
                 {/* Linha 1 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno1Cond} type='text' /></div>
-                <div className="field-p"><label>Cond 1</label><input value={MachoRetorno1Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 1</label><input value={MachoRetorno1Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 1</label><input value={MachoRetorno1VEL} type='text' /></div>
-                <div className="field-pp"><label>press 1</label><input value={MachoRetorno1PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 1</label><input value={MachoRetorno1TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno1Modo} onChange={(e) => setMachoRetorno1Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 1</label><input value={MachoRetorno1Cond} onChange={(e) => setMachoRetorno1Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 1</label><input value={MachoRetorno1Curso} onChange={(e) => setMachoRetorno1Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 1</label><input value={MachoRetorno1VEL} onChange={(e) => setMachoRetorno1VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 1</label><input value={MachoRetorno1PRES} onChange={(e) => setMachoRetorno1PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 1</label><input value={MachoRetorno1TEMP} onChange={(e) => setMachoRetorno1TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno2Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 2</label><input value={MachoRetorno2Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 2</label><input value={MachoRetorno2Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 2</label><input value={MachoRetorno2VEL} type='text' /></div>
-                <div className="field-pp"><label>press 2</label><input value={MachoRetorno2PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 2</label><input value={MachoRetorno2TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno2Modo} onChange={(e) => setMachoRetorno2Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 2</label><input value={MachoRetorno2Cond} onChange={(e) => setMachoRetorno2Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 2</label><input value={MachoRetorno2Curso} onChange={(e) => setMachoRetorno2Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 2</label><input value={MachoRetorno2VEL} onChange={(e) => setMachoRetorno2VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 2</label><input value={MachoRetorno2PRES} onChange={(e) => setMachoRetorno2PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 2</label><input value={MachoRetorno2TEMP} onChange={(e) => setMachoRetorno2TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno3Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 3</label><input value={MachoRetorno3Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 3</label><input value={MachoRetorno3Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 3</label><input value={MachoRetorno3VEL} type='text' /></div>
-                <div className="field-pp"><label>press 3</label><input value={MachoRetorno3PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 3</label><input value={MachoRetorno3TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno3Modo} onChange={(e) => setMachoRetorno3Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 3</label><input value={MachoRetorno3Cond} onChange={(e) => setMachoRetorno3Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 3</label><input value={MachoRetorno3Curso} onChange={(e) => setMachoRetorno3Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 3</label><input value={MachoRetorno3VEL} onChange={(e) => setMachoRetorno3VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 3</label><input value={MachoRetorno3PRES} onChange={(e) => setMachoRetorno3PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 3</label><input value={MachoRetorno3TEMP} onChange={(e) => setMachoRetorno3TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno4Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 4</label><input value={MachoRetorno4Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 4</label><input value={MachoRetorno4Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 4</label><input value={MachoRetorno4VEL} type='text' /></div>
-                <div className="field-pp"><label>press 4</label><input value={MachoRetorno4PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 4</label><input value={MachoRetorno4TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno4Modo} onChange={(e) => setMachoRetorno4Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 4</label><input value={MachoRetorno4Cond} onChange={(e) => setMachoRetorno4Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 4</label><input value={MachoRetorno4Curso} onChange={(e) => setMachoRetorno4Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 4</label><input value={MachoRetorno4VEL} onChange={(e) => setMachoRetorno4VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 4</label><input value={MachoRetorno4PRES} onChange={(e) => setMachoRetorno4PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 4</label><input value={MachoRetorno4TEMP} onChange={(e) => setMachoRetorno4TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
                 {/* Linha 2 */}
 
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno5Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 5</label><input value={MachoRetorno5Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 5</label><input value={MachoRetorno5Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 5</label><input value={MachoRetorno5VEL} type='text' /></div>
-                <div className="field-pp"><label>press 5</label><input value={MachoRetorno5PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 5</label><input value={MachoRetorno5TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno5Modo} onChange={(e) => setMachoRetorno5Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 5</label><input value={MachoRetorno5Cond} onChange={(e) => setMachoRetorno5Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 5</label><input value={MachoRetorno5Curso} onChange={(e) => setMachoRetorno5Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 5</label><input value={MachoRetorno5VEL} onChange={(e) => setMachoRetorno5VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 5</label><input value={MachoRetorno5PRES} onChange={(e) => setMachoRetorno5PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 5</label><input value={MachoRetorno5TEMP} onChange={(e) => setMachoRetorno5TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno6Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 6</label><input value={MachoRetorno6Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 6</label><input value={MachoRetorno6Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 6</label><input value={MachoRetorno6VEL} type='text' /></div>
-                <div className="field-pp"><label>press 6</label><input value={MachoRetorno6PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 6</label><input value={MachoRetorno6TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno6Modo} onChange={(e) => setMachoRetorno6Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 6</label><input value={MachoRetorno6Cond} onChange={(e) => setMachoRetorno6Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 6</label><input value={MachoRetorno6Curso} onChange={(e) => setMachoRetorno6Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 6</label><input value={MachoRetorno6VEL} onChange={(e) => setMachoRetorno6VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 6</label><input value={MachoRetorno6PRES} onChange={(e) => setMachoRetorno6PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 6</label><input value={MachoRetorno6TEMP} onChange={(e) => setMachoRetorno6TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno7Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 7</label><input value={MachoRetorno7Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 7</label><input value={MachoRetorno7Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 7</label><input value={MachoRetorno7VEL} type='text' /></div>
-                <div className="field-pp"><label>press 7</label><input value={MachoRetorno7PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 7</label><input value={MachoRetorno7TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno7Modo} onChange={(e) => setMachoRetorno7Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 7</label><input value={MachoRetorno7Cond} onChange={(e) => setMachoRetorno7Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 7</label><input value={MachoRetorno7Curso} onChange={(e) => setMachoRetorno7Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 7</label><input value={MachoRetorno7VEL} onChange={(e) => setMachoRetorno7VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 7</label><input value={MachoRetorno7PRES} onChange={(e) => setMachoRetorno7PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 7</label><input value={MachoRetorno7TEMP} onChange={(e) => setMachoRetorno7TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
                 {/* Linha 2 */}
-                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno8Modo} type='text' /></div>
-                <div className="field-p"><label>Cond 8</label><input value={MachoRetorno8Cond} type='text' /></div>
-                <div className="field-pp"><label>Cur 8</label><input value={MachoRetorno8Curso} type='text' /></div>
-                <div className="field-pp"><label>vel 8</label><input value={MachoRetorno8VEL} type='text' /></div>
-                <div className="field-pp"><label>press 8</label><input value={MachoRetorno8PRES} type='text' /></div>
-                <div className="field-pp"><label>temp 8</label><input value={MachoRetorno8TEMP} type='text' /></div>
+                <div className="field-pp"><label>Lig/Desl</label><input value={MachoRetorno8Modo} onChange={(e) => setMachoRetorno8Modo(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>Cond 8</label><input value={MachoRetorno8Cond} onChange={(e) => setMachoRetorno8Cond(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>Cur 8</label><input value={MachoRetorno8Curso} onChange={(e) => setMachoRetorno8Curso(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>vel 8</label><input value={MachoRetorno8VEL} onChange={(e) => setMachoRetorno8VEL(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>press 8</label><input value={MachoRetorno8PRES} onChange={(e) => setMachoRetorno8PRES(e.target.value)} type='text' /></div>
+                <div className="field-pp"><label>temp 8</label><input value={MachoRetorno8TEMP} onChange={(e) => setMachoRetorno8TEMP(e.target.value)} type='text' /></div>
                 <div className='pulaLinha'></div>
 
 
@@ -1038,14 +1277,14 @@ const [maquinas,setMaquinas] = useState([
           </div>
 
           <label>Observações</label>
-          <textarea className="txt-area" value={obsMacho} placeholder='Observações a respeito da refrigeração' />
+          <textarea className="txt-area" value={obsMacho} onChange={(e) => setobsMacho(e.target.value)} placeholder='Observações a respeito da refrigeração' />
 
         </Section>
 
         <Section title="PROCESSOS E MONTAGEM">
           <div className='field'>
             <label>Informações</label>
-            <textarea className="txt-area" value={obsProcMontagem} placeholder="Digite aqui..."></textarea>
+            <textarea className="txt-area" value={obsProcMontagem} onChange={(e) => setobsProcMontagem(e.target.value)} placeholder="Digite aqui..."></textarea>
           </div>
 
         </Section>
@@ -1053,7 +1292,7 @@ const [maquinas,setMaquinas] = useState([
         <Section title="OPINIÃO TÉCNICA">
           <div className='field'>
             <label>Informações</label>
-            <textarea className="txt-area" value={obsOptecnica} placeholder="Digite aqui..."></textarea>
+            <textarea className="txt-area" value={obsOptecnica} onChange={(e) => obsOptecnicaset(e.target.value)} placeholder="Digite aqui..."></textarea>
           </div>
 
         </Section>
@@ -1061,7 +1300,7 @@ const [maquinas,setMaquinas] = useState([
         <Section title="CONTROLE DE QUALIDADE">
           <div className='field'>
             <label>Informações</label>
-            <textarea className="txt-area" value={obsQualidade} placeholder="Digite aqui..."></textarea>
+            <textarea className="txt-area" value={obsQualidade} onChange={(e) => setobsQualidade(e.target.value)} placeholder="Digite aqui..."></textarea>
           </div>
 
         </Section>
@@ -1089,7 +1328,7 @@ const [maquinas,setMaquinas] = useState([
           </div>
         </Section>
 
-        <button style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
+        <button onClick={handleSaveFicha} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
           Salvar Ficha
         </button>
 

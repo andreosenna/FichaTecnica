@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import {BrowserRouter, Routes, Route, Link, useLocation} from 'react-router-dom'
+//import { useState } from 'react'
+// import {useLocation} from 'react-router-dom'
+import {BrowserRouter, Routes, Route, Link} from 'react-router-dom'
 import Home from './pages/Home'
 import FTP from './pages/FTP'
 import Teste from './pages/Teste'
