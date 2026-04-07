@@ -182,20 +182,61 @@
     border-right-color: var(--border);
   }
 }
+.quadroMaior {
+  display: flex; /* Corrigido de flexbox para flex */
+  justify-content: space-between;
+  gap: 40px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.coluna {
+  flex: 1; /* Garante que as duas colunas dividam o espaço igualmente */
+}
+
 .campos-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px; /* Espaço entre os conjuntos */
+  gap: 5px;
 }
-.field {
-  display: flex;
-  flex-direction: column; /* Label em cima, input embaixo */
-}
-.field label {
+
+.field-p {
   font-size: 12px;
-  margin-bottom: 1px;
+  margin-bottom: 5px;
+  width: 60px; /* Largura de cada conjuntinho label+input */
+  display: flex;
+  flex-direction: column;
+}
+
+.field-p input {
+  width: 100%;
+  padding: 2px;
+  box-sizing: border-box;
+}
+.field-pp {
+  font-size: 12px;
+  margin-bottom: 5px;
+  width: 40px; /* Largura de cada conjuntinho label+input */
+  display: flex;
+  flex-direction: column;
+}
+
+.field-pp input {
+  width: 100%;
+  padding: 2px;
+  box-sizing: border-box;
 }
 .pulaLinha {
-  flex-basis: 100%;
+  flex-basis: 100%; /* Força a quebra de linha dentro da coluna */
   height: 0;
+}
+
+.txt-area {
+  width: 100%;       /* Ocupa toda a largura da coluna */
+  min-height: 80px;  /* Define uma altura inicial */
+  padding: 8px;      /* Espaço interno para o texto não encostar na borda */
+  box-sizing: border-box; /* Garante que o padding não aumente o tamanho total */
+  resize: vertical;  /* Permite ao usuário aumentar a altura, mas não a largura (para não quebrar o layout) */
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }

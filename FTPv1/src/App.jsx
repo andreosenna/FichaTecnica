@@ -17,6 +17,11 @@ const navStyle = {
     gap: "20px",            // Espaço entre os botões/links
     zIndex: 1000,           // Garante que o menu fique na frente de tudo
     boxSizing: "border-box" // Garante que o padding não estoure os 100%
+    
+  };
+  const contentStyle = {
+    marginTop: "60px", // Ajuste este valor conforme a altura real do seu menu
+    padding: "20px"    // Opcional: apenas para não encostar nas bordas
   };
 const linkStyle = {
     color: "white",
@@ -30,11 +35,14 @@ return(
         <Link style={linkStyle} to="/FTP">Fichas Técnicas</Link>
         <Link style={linkStyle} to="/Teste">Teste</Link>
       </nav>
+      <div style={contentStyle}>
     <Routes>
       <Route path="/" element={<Home/>}/>
       <Route path="/FTP" element={<FTP/>}/>
       <Route path="/Teste" element={<Teste/>}/>
+   
     </Routes>
+       </div>
     </>
  
   )

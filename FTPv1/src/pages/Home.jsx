@@ -7,7 +7,7 @@ export default function Home(){
 <>
 <section>
 <div>
-    <h1>Bem vindo ao Sistela de Gestão de Fichas Técnicas</h1>
+    <h1>Bem vindo ao Sistema de Gestão de Fichas Técnicas</h1>
     <br/>
     <h3>Menu</h3>
     <ul>
