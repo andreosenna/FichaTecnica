@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import {useNavigate} from 'react-router-dom'
 import Section from '../components/Section'
+import supabase from '../conexao/conexao'
 
 export default function OPs(){
 //const URL = 'https://69cebbb833a09f831b7debab.mockapi.io/'
@@ -16,22 +17,55 @@ const [MPAlocada,setMPAlocada] = useState('')
 const [MPApontada,setMPApontada] = useState('')
 const [PerdaKg,setPerdaKg] = useState('')
 const [PerdaPercentual,setPerdaPercentual] = useState('')
+const navigate = useNavigate()
+const [OPs,setOPs] = useState([])
+const [loading,setLoading]=  useState(true)
+const [error,setError] = useState(null)
 
-useEffect(()=>{
+/*useEffect(()=>{
 fetch(`${URL}Produtos`)
 .then(res=> res.json())
 .then(data=> setListaProdutos(data))
+},[])*/
+
+useEffect(()=>{
+const fetchProdutos = async ()=>{
+ 
+    const {data} = await supabase.from('Produtos').select('*')
+    setListaProdutos(data)
+ 
+}
+fetchProdutos()
 },[])
 
+useEffect(() => {
+  const fetchOPs = async () => {
+    try {
+      setLoading(true); // Garante que o loading comece ao iniciar a busca
+      const { data, error } = await supabase.from('OPs').select('*');
+      
+      if (error) throw error;
+
+      setOPs(data || []); // Verifique se o nome da função é setOps ou SetOPs
+    } catch (err) {
+      console.error('Erro ao buscar OPs:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchOPs(); // A chamada deve ser feita aqui, fora da definição da função
+}, []);
+/*
+///////////// antigo
 useEffect(()=>{
 fetch(`${URL}OPs`)
 .then(res=> res.json())
 .then(data=> SetOPs(data))
-},[])
+},[])*/
 
 
-const navigate = useNavigate()
-const [OPs,SetOPs] = useState([])
+
 
 
 
@@ -39,6 +73,41 @@ const handleAbrirOP = (opSelecionada)=>{
 navigate (`/Apontamentos/${opSelecionada.op}`, {state: {data:opSelecionada}})
 }
 
+const handleCriarOP = async () => { // Adicionamos async aqui
+  try {
+    const novaOP = {
+      nomeProduto,
+      NOPSistema,
+      codProduto,
+      Demanda,
+      Produzido: 0,
+      MPAlocada,
+      MPApontada: 0,
+      PerdaKg: 0,
+      PerdaPercentual: 0,
+      StatusOP: 'Pendente' // Status inicial, por exemplo
+    };
+
+    // No Supabase, você usa await em vez de .then() para ficar mais limpo
+    const { data, error } = await supabase
+      .from('OPs')
+      .insert([novaOP]) // O Supabase exige que seja um array []
+      .select();       // IMPORTANTE: Sem o .select(), o 'data' volta vazio!
+
+    if (error) throw error;
+
+    // O data do Supabase é sempre uma lista, então pegamos o primeiro item [0]
+    if (data) {
+      setOPs(prev => [...prev, data[0]]); 
+      alert('OP criada com sucesso!');
+    }
+
+  } catch (error) {
+    console.error('Erro ao criar OP:', error);
+    alert('Ocorreu um erro ao criar a OP. Tente novamente.');
+  }
+};
+/*
 const handleCriarOP = (OP)=>{
 try {
    
@@ -53,6 +122,7 @@ try {
         PerdaKg:0,
         PerdaPercentual:0
     }
+    
     fetch(`${URL}OPs`,{
         method: 'POST',
         headers: {
@@ -69,7 +139,7 @@ try {
     console.error('Erro ao criar OP:', error)
     alert('Ocorreu um erro ao criar a OP. Tente novamente.')
 }
-}
+}*/
 
 const handleAtualizarCodProduto = (e)=>{
 
@@ -177,7 +247,7 @@ const handleAtualizarCodProduto = (e)=>{
     </div>
 
     <div style={formStyles.footer}>
-      <button style={formStyles.mainButton}>
+      <button onClick={handleCriarOP} style={formStyles.mainButton}>
         🚀 Gerar Ordem de Produção
       </button>
     </div>

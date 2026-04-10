@@ -54,6 +54,7 @@ return(
       <Route path="/Apontamentos" element={<Apontamentos/>}/>
       <Route path="/OPs" element={<OPs/>}/>
       <Route path="/Painel" element={<Painel/>}/>
+      <Route path="/Login" element={<Login/>}/>
       <Route path="/Apontamentos/:op" element={<Apontamentos />} />
       <Route path="/Teste" element={<Teste/>} />
       

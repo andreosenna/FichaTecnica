@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import supabase from '../conexao/conexao'
 
 export default function Apontamento() {
     const [Produzido, setProduzido] = useState('');
@@ -12,7 +13,29 @@ export default function Apontamento() {
 
     const location = useLocation();
     const { op } = useParams();
-    const URL = 'https://69cebbb833a09f831b7debab.mockapi.io/';
+
+ /*useEffect(()=>{
+    const opCompleta = async () =>{
+        try{
+            const {data,error} = await supabase.from('OPs').select('*').select()
+            if(error){
+                throw error
+            }
+            if(data){
+                setOpCompleta(data)
+            }
+            
+            }catch(error){
+                console.log(error)
+            }
+                
+
+        } 
+        opCompleta()
+    },
+ [])   
+    */
+/*    const URL = 'https://69cebbb833a09f831b7debab.mockapi.io/';
 
     // Buscar dados completos da OP do mockapi
     useEffect(() => {
@@ -102,7 +125,7 @@ export default function Apontamento() {
             alert('Erro ao registrar apontamento. Tente novamente.');
         }
     };
-
+*/
     return (
         <div style={styles.container}>
             {/* CABEÇALHO COM INFORMAÇÕES DA OP */}

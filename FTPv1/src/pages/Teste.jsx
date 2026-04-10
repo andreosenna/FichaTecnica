@@ -10,7 +10,7 @@ export default function Teste(){
    useEffect(() =>{
         const fetchOPs = async ()=>{
 try{
-        const {data,error}= await supabase.from('OPs').select('*') 
+        const {data,error}= await supabase.from('OPs').select('*').order('id')
 if(error){
     throw error
 }setOPs(data || [])
