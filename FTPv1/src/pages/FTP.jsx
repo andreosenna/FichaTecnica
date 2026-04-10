@@ -596,9 +596,10 @@ const [maquinas,setMaquinas] = useState([
     <>
 
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-
-        <h1>Ficha Técnica</h1>
-        <img style={{ height: '200px' }} src={moldes[1].foto} />
+<div style={{background:'#555858', color:'white'}}>
+        <h3>Ficha Técnica</h3>
+        <img style={{ height: '200px', border:'4px solid gray', padding:' 10px 10px 10px 10px', margin:'10px 10px 30px 10px'}} src={moldes[1].foto} />
+        
         <div className='quadroMaior'>
           <div className='coluna'>
             <div className='campos-container'>
@@ -617,10 +618,11 @@ const [maquinas,setMaquinas] = useState([
                 ))
                 }</select>
               <div className='pulaLinha'></div>
-              <label>Nome do Produto:</label>
-              <input type="text" style={{ width: '300px' }} />
-              <div style={{ padding: '20px' }}>
-              </div></div>
+                    <label>Produto:</label>
+                      <input type="text" style={{ width: '300px' }} />
+                    <div style={{ padding: '20px' }}>
+                  </div>
+              </div>
             <div className='coluna'>
               <div className='campos-container'>
 
@@ -630,19 +632,21 @@ const [maquinas,setMaquinas] = useState([
                 <div className="field-p"><label>Peso</label><input value={pesoIdeal} onChange={(e) => setpesoIdeal(e.target.value)} type='text' /></div>
                 <div className="field-p"><label>Padrão</label><input value={""} type='text' /></div>
                 <div className="field-p"><label>Embalagem</label><input value={""} type='text' /></div>
-                <div className="field-p"><label>T Dos</label><input value={tDosagem} onChange={(e) => settDosagem(e.target.value)} type='text' /></div>
-                <div className="field-p"><label>T Inj</label><input value={tInjecao} onChange={(e) => settInjecao(e.target.value)} type='text' /></div>
-                <div className="field-p"><label>T Ext</label><input value={tExtracao} onChange={(e) => settExtracao(e.target.value)} type='text' /></div>
-                <div className="field-p"><label>T Abe</label><input value={tAbertura} onChange={(e) => settAbertura(e.target.value)} type='text' /></div>
-                <div className="field-p"><label>T Fech</label><input value={tFechamento} onChange={(e) => settFechamento(e.target.value)} type='text' /></div>
-                <div className="field"><label>Elaborado por:</label><input value={ElaboraPor} onChange={(e) => setElaboraPor(e.target.value)} type='text' /></div>
-                <div className="field-p"><label>Aprovado por:</label><input value={AprovadoPor} onChange={(e) => setAprovadoPor(e.target.value)} type='text' /></div>
-                <div className="field-p"><label>Aprovado em:</label><input value={data} onChange={(e) => setdata(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Dos</label><input value={tDosagem} type='text' /></div>
+                <div className="field-p"><label>T Inj</label><input value={tInjecao} type='text' /></div>
+                <div className="field-p"><label>T Ext</label><input value={tExtracao} type='text' /></div>
+                <div className="field-p"><label>T Abe</label><input value={tAbertura} type='text' /></div>
+                <div className="field-p"><label>T Fech</label><input value={tFechamento} type='text' /></div>
+                </div><br/>
+                <div style={{textAlign:'right'}}>
+                <div><label>Elaborado por:</label><input value={ElaboraPor} type='text' /></div>
+                <div><label>Aprovado por:</label><input value={AprovadoPor} type='text' /></div>
+                <div><label>Aprovado em:</label><input value={data} type='text' /></div>
               </div>
             </div>
           </div>
         </div>
-
+</div>
         {/* CABEÇALHO */}
 
         <Section title="MATÉRIA PRIMA">
