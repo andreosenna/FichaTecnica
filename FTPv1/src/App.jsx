@@ -2,8 +2,15 @@ import { useState } from 'react'
 import {BrowserRouter, Routes, Route, Link, useLocation} from 'react-router-dom'
 import Home from './pages/Home'
 import FTP from './pages/FTP'
+import Apontamentos from './pages/Apontamentos'
+import OP from './pages/OPs'
+import Login from './pages/Login'
+import Painel from './pages/Painel'
 import Teste from './pages/Teste'
+//import supabase from './conexao/conexao'
+
 import './App.css'
+import OPs from './pages/OPs'
 function Layout() {
 const navStyle = {
     position: "fixed",      // Fixa no topo
@@ -33,13 +40,23 @@ return(
       <nav style={navStyle}>
         <Link style={linkStyle} to="/">Home</Link>
         <Link style={linkStyle} to="/FTP">Fichas Técnicas</Link>
+        <Link style={linkStyle} to="/Painel">Painel</Link>
+        <Link style={linkStyle} to="/OPs">Ordens de Produção</Link>
+        <Link style={linkStyle} to="/Login">Login</Link>
         <Link style={linkStyle} to="/Teste">Teste</Link>
       </nav>
+
       <div style={contentStyle}>
+        
     <Routes>
       <Route path="/" element={<Home/>}/>
       <Route path="/FTP" element={<FTP/>}/>
-      <Route path="/Teste" element={<Teste/>}/>
+      <Route path="/Apontamentos" element={<Apontamentos/>}/>
+      <Route path="/OPs" element={<OPs/>}/>
+      <Route path="/Painel" element={<Painel/>}/>
+      <Route path="/Apontamentos/:op" element={<Apontamentos />} />
+      <Route path="/Teste" element={<Teste/>} />
+      
    
     </Routes>
        </div>
