@@ -1,6 +1,6 @@
 //import { useEffect } from 'react'
 import React, { useState } from 'react'
-import Section from '../components/Section'
+import Section from '../../components/Section'
 export default function FTP() {
 
   const [moldes, setMoldes] = useState([

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import {useNavigate} from 'react-router-dom'
-import Section from '../components/Section'
-import supabase from '../conexao/conexao'
+import Section from '../../components/Section'
+import supabase from '../../conexao/conexao'
 
 export default function OPs(){
 //const URL = 'https://69cebbb833a09f831b7debab.mockapi.io/'

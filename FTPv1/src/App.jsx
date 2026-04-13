@@ -2,16 +2,17 @@
 // import {useLocation} from 'react-router-dom'
 import {BrowserRouter, Routes, Route, Link} from 'react-router-dom'
 import Home from './pages/Home'
-import FTP from './pages/FTP'
-import Apontamentos from './pages/Apontamentos'
-import OP from './pages/OPs'
+import FTP from './pages/FTP/FTP'
+import Apontamentos from './pages/OP/Apontamentos'
+import OP from './pages/OP/OPs'
 import Login from './pages/Login'
-import Painel from './pages/Painel'
+import Painel from './pages/OP/Painel'
 import Teste from './pages/Teste'
 //import supabase from './conexao/conexao'
 
 import './App.css'
-import OPs from './pages/OPs'
+import OPs from './pages/OP/OPs'
+
 function Layout() {
 const navStyle = {
     position: "fixed",      // Fixa no topo
