@@ -9,7 +9,10 @@ import Login from './pages/Login'
 import Painel from './pages/OP/Painel'
 import Teste from './pages/Teste'
 import OPs from './pages/OP/OPs'
+import OrdemServico from './pages/OS/OrdemServico'
 import './App.css'
+import PadraoEmbalagem from './pages/FTP/PadraoEmbalagem'
+import AprovacaoNovoPadrao from './pages/FTP/AprovacaoNovoPadrao'
 
 // --- Subcomponente de Dropdown para Reutilização ---
 const NavDropdown = ({ title, links }) => {
@@ -70,7 +73,6 @@ function Layout() {
     zIndex: 1000, boxSizing: "border-box"
   };
 
-  const contentStyle = { marginTop: "60px", padding: "20px" };
 
   return (
     <>
@@ -89,7 +91,9 @@ function Layout() {
           title="Fichas Técnicas" 
           links={[
             { label: "Fichas Técnicas", path: "/FTP" },
-            { label: "Teste", path: "/Teste" }
+            { label: "Teste", path: "/Teste" },
+            { label: "Padrão de Embalagem", path: "/PadraoEmbalagem" },
+            { label: "Aprovação de Novo Padrão", path: "/AprovacaoNovoPadrao" }
           ]} 
         />
 
@@ -101,10 +105,20 @@ function Layout() {
             { label: "Painel", path: "/Painel" }
           ]} 
         />
+        <NavDropdown
+          title="Ordens de Serviço"
+          links={[
+            { label: "Ordem de Serviço", path: "/OrdemServico" }
+          ]}
+        />
+
+        
       </nav>
 
-      <div style={contentStyle}>
-        <Routes>
+{/*** AREA RENDERIZADA DA PAGINA ***/}
+
+      <div style={{marginTop: "60px", padding: "20px"}}>
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/FTP" element={<FTP />} />
           <Route path="/Apontamentos" element={<Apontamentos />} />
@@ -113,6 +127,9 @@ function Layout() {
           <Route path="/Login" element={<Login />} />
           <Route path="/Apontamentos/:op" element={<Apontamentos />} />
           <Route path="/Teste" element={<Teste />} />
+          <Route path="/OrdemServico" element={<OrdemServico />} />
+          <Route path="/PadraoEmbalagem" element={<PadraoEmbalagem />} />
+          <Route path="/AprovacaoNovoPadrao" element={<AprovacaoNovoPadrao />} />
         </Routes>
       </div>
     </>
