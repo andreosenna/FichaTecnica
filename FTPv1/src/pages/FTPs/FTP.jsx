@@ -1,5 +1,5 @@
-//import { useEffect } from 'react'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import Section from '../../components/Section'
 export default function FTP() {
 const  MOCKAPI_URL = "https://69c55f5e8a5b6e2dec2c4e9b.mockapi.io/gfila/api/fichaTecnica"
@@ -28,11 +28,11 @@ const [maquinas,setMaquinas] = useState([
   const [tipo, settipo] = useState()
   const [versao, setversao] = useState()
   const [data, setdata] = useState()
-  const [molde, setmolde] = useState()
+  const [molde, setmolde] = useState(moldes[0]?.molde || '')
   const [papi, setpapi] = useState()
   const [codmolde, setcodmolde] = useState()
   const [cavidades, setcavidades] = useState()
-  const [maquina, setmaquina] = useState()
+  const [maquina, setmaquina] = useState(maquinas[0]?.maquina || '')
   const [programa, setprograma] = useState()
   const [Pilha, setPilha] = useState()
   const [lastro, setlastro] = useState()
@@ -355,251 +355,484 @@ const [maquinas,setMaquinas] = useState([
   const [VerificadoPor, setVerificadoPor] = useState()
   const [AprovadoPor, setAprovadoPor] = useState()
 
-  const[ficha, setFicha] = useState([])
+  const [imagemCabecalho, setImagemCabecalho] = useState('')
+  const [imagens, setImagens] = useState([])
 
-  const handleSaveFicha = () => {
-    const fichaSalva = {
-      // INFORMAÇÕES GERAIS
-      cabecalho: {
-        tipo,
-        versao,
-        data,
-        molde,
-        papi,
-        codmolde,
-        cavidades,
-        maquina,
-        programa,
-        ElaboraPor,
-        VerificadoPor,
-        AprovadoPor,
-      },
+  const [ficha, setFicha] = useState(null)
+  const [formMode, setFormMode] = useState('new')
+  const [editingId, setEditingId] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [searchParams] = useSearchParams()
 
-      // DADOS BÁSICOS
-      dadosBasicos: {
-        Pilha,
-        lastro,
-        meio,
-        total,
-        pesoIdeal,
-        tolerancia,
-        pressaoInjecaoReal,
-        PH,
-      },
+  const resizeImageFile = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const img = new Image()
+      img.onload = () => {
+        const maxDimension = 600
+        let width = img.width
+        let height = img.height
 
-      // TEMPOS
-      tempos: {
-        tAbertura,
-        tFechamento,
-        tDosagem,
-        tInjecao,
-        tRecalque,
-        tResfriamento,
-        tExtracao,
-        tCiclo,
-        tRebarbagem,
-        tExtracaoAux,
-        tMontagem,
-        tempoResfriamento,
-        TempoCiclo,
-      },
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((maxDimension / width) * height)
+            width = maxDimension
+          } else {
+            width = Math.round((maxDimension / height) * width)
+            height = maxDimension
+          }
+        }
 
-      // MATÉRIA PRIMA E TEMPERATURAS
-      materiaPrima: {
-        materiaPrima,
-        secador,
-        secTemperatura,
-        secTempo,
-        CamaraQuente,
-      },
-
-      // ZONA DE TEMPERATURAS
-      temperaturas: {
-        bico,
-        zonas: { z1, z2, z3, z4, z5, z6, z7, z8, z9, z10, z11, z12, z13 },
-        camerasQuentes: {
-          c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13,
-          c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27,
-        },
-        obsTemperaturas,
-      },
-
-      // REFRIGERAÇÃO
-      refrigeracao: {
-        refrigeracao,
-        obsRefrigeracao,
-      },
-
-      // ABERTURA E FECHAMENTO
-      aberturaFechamento: {
-        abertura: {
-          ab1: { VEL: ab1VEL, PRES: ab1PRES, POS: ab1POS },
-          ab2: { VEL: ab2VEL, PRES: ab2PRES, POS: ab2POS },
-          ab3: { VEL: ab3VEL, PRES: ab3PRES, POS: ab3POS },
-          ab4: { VEL: ab4VEL, PRES: ab4PRES, POS: ab4POS },
-          ab5: { VEL: abFimVEL, PRES: abFimPRES, POS: abFimPOS },
-        },
-        fechamento: {
-          fecha1: { VEL: fecha1VEL, PRES: fecha1PRES, POS: fecha1POS },
-          fecha2: { VEL: fecha2VEL, PRES: fecha2PRES, POS: fecha2POS },
-          fecha3: { VEL: fecha3VEL, PRES: fecha3PRES, POS: fecha3POS },
-          fecha4: { VEL: fecha4VEL, PRES: fecha4PRES, POS: fecha4POS },
-          fecha5: { VEL: fechaFimVEL, PRES: fechaFimPRES, POS: fechaFimPOS },
-        },
-        obsAbreFecha,
-        FechaAexPres,
-        FechaBaixaPresPres,
-        FechaForcaFechaPres,
-      },
-
-      // DOSAGEM, INJEÇÃO E RECALQUE
-      dosagemInjecaoRecalque: {
-        dosagem: {
-          dosagem1: { VEL: dosagem1VEL, PRES: dosagem1PRES, CtP: dosagem1CONPRES, POS: dosagem1POS },
-          dosagem2: { VEL: dosagem2VEL, PRES: dosagem2PRES, CtP: dosagem2CONPRES, POS: dosagem2POS },
-          dosagem3: { VEL: dosagem3VEL, PRES: dosagem3PRES, CtP: dosagem3CONPRES, POS: dosagem3POS },
-          retDosagem,
-        },
-        injecao: {
-          tipoInjecao,
-          injecao1: { VEL: injecao1VEL, PRES: injecao1PRES, POS: injecao1POS },
-          injecao2: { VEL: injecao2VEL, PRES: injecao2PRES, POS: injecao2POS },
-          injecao3: { VEL: injecao3VEL, PRES: injecao3PRES, POS: injecao3POS },
-          injecao4: { VEL: injecao4VEL, PRES: injecao4PRES, POS: injecao4POS },
-          InjecaoPressaoMax,
-          InjecaoTempoProgramado,
-          injecaoComutacao,
-          InjecaoLeakage,
-          injecaoColchao,
-        },
-        recalque: {
-          recalqueTipo,
-          recalque1: { VEL: recalque1VEL, PRES: recalque1PRES, TEMP: recalque1TEMP },
-          recalque2: { VEL: recalque2VEL, PRES: recalque2PRES, TEMP: recalque2TEMP },
-          recalque3: { VEL: recalque3VEL, PRES: recalque3PRES, TEMP: recalque3TEMP },
-          recalque4: { VEL: recalque4VEL, PRES: recalque4PRES, TEMP: recalque4TEMP },
-          obsRecalque,
-        },
-      },
-
-      // DESCOMPRESSÃO
-      descompressao: {
-        descDianteiraSimNao,
-        descTraseiraSimNao,
-        descTraseira: { VEL: descTraseiraVEL, PRES: descTraseiraPRES, POS: descTraseiraPOS },
-      },
-
-      // EXTRAÇÃO MECÂNICA
-      extracaoMecanica: {
-        extracaoTipo,
-        extracaoRepetir,
-        extracaoRepetirQte,
-        extracaoPausa,
-        extracaoAux,
-        avancos: {
-          avancos1: { VEL: extAvanco1VEL, PRES: extAvanco1PRES, POS: extAvanco1POS },
-          avancos2: { VEL: extAvanco2VEL, PRES: extAvanco2PRES, POS: extAvanco2POS },
-        },
-        retornos: {
-          retorno1: { VEL: extRetorno1VEL, PRES: extRetorno1PRES, POS: extRetorno1POS },
-          retorno2: { VEL: extRetorno2VEL, PRES: extRetorno2PRES, POS: extRetorno2POS },
-        },
-        obsExtracaoMecanica,
-      },
-
-      // PNEUMÁTICO
-      pneumatico: {
-        ar1: { Tipo: extPneu1Tipo, Posicao: extPneu1POS, Atraso: extPneu1RET, Tempo: extPneu1TEMP },
-        ar2: { Tipo: extPneu2Tipo, Posicao: extPneu2POS, Atraso: extPneu2RET, Tempo: extPneu2TEMP },
-        ar3: { Tipo: extPneu3Tipo, Posicao: extPneu3POS, Atraso: extPneu3RET, Tempo: extPneu3TEMP },
-        ar4: { Tipo: extPneu4Tipo, Posicao: extPneu4POS, Atraso: extPneu4RET, Tempo: extPneu4TEMP },
-        ar5: { Tipo: extPneu5Tipo, Posicao: extPneu5POS, Atraso: extPneu5RET, Tempo: extPneu5TEMP },
-        ar6: { Tipo: extPneu6Tipo, Posicao: extPneu6POS, Atraso: extPneu6RET, Tempo: extPneu6TEMP },
-      },
-
-      // MACHOS - AVANÇOS
-      machosAvancos: {
-        macho1: { Modo: MachoAvanco1Modo, Cond: MachoAvanco1Cond, Curso: MachoAvanco1Curso, VEL: MachoAvanco1VEL, PRES: MachoAvanco1PRES, TEMP: MachoAvanco1TEMP },
-        macho2: { Modo: MachoAvanco2Modo, Cond: MachoAvanco2Cond, Curso: MachoAvanco2Curso, VEL: MachoAvanco2VEL, PRES: MachoAvanco2PRES, TEMP: MachoAvanco2TEMP },
-        macho3: { Modo: MachoAvanco3Modo, Cond: MachoAvanco3Cond, Curso: MachoAvanco3Curso, VEL: MachoAvanco3VEL, PRES: MachoAvanco3PRES, TEMP: MachoAvanco3TEMP },
-        macho4: { Modo: MachoAvanco4Modo, Cond: MachoAvanco4Cond, Curso: MachoAvanco4Curso, VEL: MachoAvanco4VEL, PRES: MachoAvanco4PRES, TEMP: MachoAvanco4TEMP },
-        macho5: { Modo: MachoAvanco5Modo, Cond: MachoAvanco5Cond, Curso: MachoAvanco5Curso, VEL: MachoAvanco5VEL, PRES: MachoAvanco5PRES, TEMP: MachoAvanco5TEMP },
-        macho6: { Modo: MachoAvanco6Modo, Cond: MachoAvanco6Cond, Curso: MachoAvanco6Curso, VEL: MachoAvanco6VEL, PRES: MachoAvanco6PRES, TEMP: MachoAvanco6TEMP },
-        macho7: { Modo: MachoAvanco7Modo, Cond: MachoAvanco7Cond, Curso: MachoAvanco7Curso, VEL: MachoAvanco7VEL, PRES: MachoAvanco7PRES, TEMP: MachoAvanco7TEMP },
-        macho8: { Modo: MachoAvanco8Modo, Cond: MachoAvanco8Cond, Curso: MachoAvanco8Curso, VEL: MachoAvanco8VEL, PRES: MachoAvanco8PRES, TEMP: MachoAvanco8TEMP },
-      },
-
-      // MACHOS - RETORNOS
-      machosRetornos: {
-        macho1: { Modo: MachoRetorno1Modo, Cond: MachoRetorno1Cond, Curso: MachoRetorno1Curso, VEL: MachoRetorno1VEL, PRES: MachoRetorno1PRES, TEMP: MachoRetorno1TEMP },
-        macho2: { Modo: MachoRetorno2Modo, Cond: MachoRetorno2Cond, Curso: MachoRetorno2Curso, VEL: MachoRetorno2VEL, PRES: MachoRetorno2PRES, TEMP: MachoRetorno2TEMP },
-        macho3: { Modo: MachoRetorno3Modo, Cond: MachoRetorno3Cond, Curso: MachoRetorno3Curso, VEL: MachoRetorno3VEL, PRES: MachoRetorno3PRES, TEMP: MachoRetorno3TEMP },
-        macho4: { Modo: MachoRetorno4Modo, Cond: MachoRetorno4Cond, Curso: MachoRetorno4Curso, VEL: MachoRetorno4VEL, PRES: MachoRetorno4PRES, TEMP: MachoRetorno4TEMP },
-        macho5: { Modo: MachoRetorno5Modo, Cond: MachoRetorno5Cond, Curso: MachoRetorno5Curso, VEL: MachoRetorno5VEL, PRES: MachoRetorno5PRES, TEMP: MachoRetorno5TEMP },
-        macho6: { Modo: MachoRetorno6Modo, Cond: MachoRetorno6Cond, Curso: MachoRetorno6Curso, VEL: MachoRetorno6VEL, PRES: MachoRetorno6PRES, TEMP: MachoRetorno6TEMP },
-        macho7: { Modo: MachoRetorno7Modo, Cond: MachoRetorno7Cond, Curso: MachoRetorno7Curso, VEL: MachoRetorno7VEL, PRES: MachoRetorno7PRES, TEMP: MachoRetorno7TEMP },
-        macho8: { Modo: MachoRetorno8Modo, Cond: MachoRetorno8Cond, Curso: MachoRetorno8Curso, VEL: MachoRetorno8VEL, PRES: MachoRetorno8PRES, TEMP: MachoRetorno8TEMP },
-      },
-
-      // OBSERVAÇÕES E ANOTAÇÕES
-      observacoes: {
-        obsMacho,
-        obsProcMontagem,
-        obsOptecnica,
-        obsQualidade,
-        instrucoes,
-        consideracoes,
-      },
-
-      // ATRASOS
-      atrasos: {
-        MachoAvancoAtraso,
-        MachoRetornoAtraso,
-      },
-
-      // RETORNOS E CONTROLES
-      controlesRetorno: {
-        retSaidaExtracao,
-        baixaPressao,
-        retFimAltaPressao,
-        retFimFechamento,
-        retExtrator,
-        retRecuoBico,
-        retAvancoBico,
-        retPurga,
-        aberturaLentaPorta,
-        portaAberta,
-      },
-
-      // Alarmes e configurações adicionais
-      alarmeReciclo: {
-        alarmeRetDosagem,
-        Reciclo,
-        descAnteDosagem,
-      },
-
-      // Configurações do friso
-      configFriso: {
-        ALPRFIABPRES,
-        sicExtraPres,
-        FecAuxPres,
-      },
-
-      // Timestamp
-      dataCriacao: new Date().toISOString(),
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, width, height)
+        const dataUrl = canvas.toDataURL('image/webp', 0.5)
+        resolve(dataUrl)
+      }
+      img.onerror = reject
+      img.src = reader.result
     }
-    setFicha(fichaSalva)
-    console.log('Ficha Salva:', fichaSalva)
-    return fichaSalva
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+
+  const handleImagemCabecalhoChange = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const dataUrl = await resizeImageFile(file)
+    setImagemCabecalho(dataUrl)
   }
+
+  const handleAddImagem = () => {
+    setImagens(prev => [...prev, { id: Date.now(), imagem: '', titulo: '', observacao: '' }])
+  }
+
+  const handleRemoveImagem = (id) => {
+    setImagens(prev => prev.filter(item => item.id !== id))
+  }
+
+  const handleImagemChange = async (id, event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const dataUrl = await resizeImageFile(file)
+    setImagens(prev => prev.map(item => item.id === id ? { ...item, imagem: dataUrl } : item))
+  }
+
+  const handleImagemTituloChange = (id, value) => {
+    setImagens(prev => prev.map(item => item.id === id ? { ...item, titulo: value } : item))
+  }
+
+  const handleImagemObservacaoChange = (id, value) => {
+    setImagens(prev => prev.map(item => item.id === id ? { ...item, observacao: value } : item))
+  }
+
+  // Função para enviar dados para a API
+  const incrementVersao = (valorAtual) => {
+    if (!valorAtual) return '1'
+    const match = valorAtual.match(/(\d+)(?!.*\d)/)
+    if (!match) return `${valorAtual} (nova)`
+    const number = parseInt(match[1], 10)
+    return `${valorAtual.slice(0, match.index)}${number + 1}${valorAtual.slice(match.index + match[1].length)}`
+  }
+
+  const handleSaveFicha = async () => {
+    try {
+      setLoading(true)
+      const isEditMode = formMode === 'edit' && editingId
+      const url = isEditMode ? `${MOCKAPI_URL}/${editingId}` : MOCKAPI_URL
+      const method = isEditMode ? 'PUT' : 'POST'
+      const fichaSalva = {
+        // INFORMAÇÕES GERAIS
+        cabecalho: {
+          tipo,
+          versao,
+          data,
+          molde,
+          papi,
+          codmolde,
+          cavidades,
+          maquina,
+          programa,
+          ElaboraPor,
+          VerificadoPor,
+          AprovadoPor,
+          imagem_cabecalho: imagemCabecalho,
+        },
+
+        // DADOS BÁSICOS
+        dadosBasicos: {
+          Pilha,
+          lastro,
+          meio,
+          total,
+          pesoIdeal,
+          tolerancia,
+          pressaoInjecaoReal,
+          PH,
+        },
+
+        // TEMPOS
+        tempos: {
+          tAbertura,
+          tFechamento,
+          tDosagem,
+          tInjecao,
+          tRecalque,
+          tResfriamento,
+          tExtracao,
+          tCiclo,
+          tRebarbagem,
+          tExtracaoAux,
+          tMontagem,
+          tempoResfriamento,
+          TempoCiclo,
+        },
+
+        // MATÉRIA PRIMA E TEMPERATURAS
+        materiaPrima: {
+          materiaPrima,
+          secador,
+          secTemperatura,
+          secTempo,
+          CamaraQuente,
+        },
+
+        // ZONA DE TEMPERATURAS
+        temperaturas: {
+          bico,
+          zonas: { z1, z2, z3, z4, z5, z6, z7, z8, z9, z10, z11, z12, z13 },
+          camerasQuentes: {
+            c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13,
+            c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27,
+          },
+          obsTemperaturas,
+        },
+
+        // REFRIGERAÇÃO
+        refrigeracao: {
+          refrigeracao,
+          obsRefrigeracao,
+        },
+
+        // ABERTURA E FECHAMENTO
+        aberturaFechamento: {
+          abertura: {
+            ab1: { VEL: ab1VEL, PRES: ab1PRES, POS: ab1POS },
+            ab2: { VEL: ab2VEL, PRES: ab2PRES, POS: ab2POS },
+            ab3: { VEL: ab3VEL, PRES: ab3PRES, POS: ab3POS },
+            ab4: { VEL: ab4VEL, PRES: ab4PRES, POS: ab4POS },
+            ab5: { VEL: abFimVEL, PRES: abFimPRES, POS: abFimPOS },
+          },
+          fechamento: {
+            fecha1: { VEL: fecha1VEL, PRES: fecha1PRES, POS: fecha1POS },
+            fecha2: { VEL: fecha2VEL, PRES: fecha2PRES, POS: fecha2POS },
+            fecha3: { VEL: fecha3VEL, PRES: fecha3PRES, POS: fecha3POS },
+            fecha4: { VEL: fecha4VEL, PRES: fecha4PRES, POS: fecha4POS },
+            fecha5: { VEL: fechaFimVEL, PRES: fechaFimPRES, POS: fechaFimPOS },
+          },
+          obsAbreFecha,
+          FechaAexPres,
+          FechaBaixaPresPres,
+          FechaForcaFechaPres,
+        },
+
+        // DOSAGEM, INJEÇÃO E RECALQUE
+        dosagemInjecaoRecalque: {
+          dosagem: {
+            dosagem1: { VEL: dosagem1VEL, PRES: dosagem1PRES, CtP: dosagem1CONPRES, POS: dosagem1POS },
+            dosagem2: { VEL: dosagem2VEL, PRES: dosagem2PRES, CtP: dosagem2CONPRES, POS: dosagem2POS },
+            dosagem3: { VEL: dosagem3VEL, PRES: dosagem3PRES, CtP: dosagem3CONPRES, POS: dosagem3POS },
+            retDosagem,
+          },
+          injecao: {
+            tipoInjecao,
+            injecao1: { VEL: injecao1VEL, PRES: injecao1PRES, POS: injecao1POS },
+            injecao2: { VEL: injecao2VEL, PRES: injecao2PRES, POS: injecao2POS },
+            injecao3: { VEL: injecao3VEL, PRES: injecao3PRES, POS: injecao3POS },
+            injecao4: { VEL: injecao4VEL, PRES: injecao4PRES, POS: injecao4POS },
+            InjecaoPressaoMax,
+            InjecaoTempoProgramado,
+            injecaoComutacao,
+            InjecaoLeakage,
+            injecaoColchao,
+          },
+          recalque: {
+            recalqueTipo,
+            recalque1: { VEL: recalque1VEL, PRES: recalque1PRES, TEMP: recalque1TEMP },
+            recalque2: { VEL: recalque2VEL, PRES: recalque2PRES, TEMP: recalque2TEMP },
+            recalque3: { VEL: recalque3VEL, PRES: recalque3PRES, TEMP: recalque3TEMP },
+            recalque4: { VEL: recalque4VEL, PRES: recalque4PRES, TEMP: recalque4TEMP },
+            obsRecalque,
+          },
+        },
+
+        // DESCOMPRESSÃO
+        descompressao: {
+          descDianteiraSimNao,
+          descTraseiraSimNao,
+          descTraseira: { VEL: descTraseiraVEL, PRES: descTraseiraPRES, POS: descTraseiraPOS },
+        },
+
+        // EXTRAÇÃO MECÂNICA
+        extracaoMecanica: {
+          extracaoTipo,
+          extracaoRepetir,
+          extracaoRepetirQte,
+          extracaoPausa,
+          extracaoAux,
+          avancos: {
+            avancos1: { VEL: extAvanco1VEL, PRES: extAvanco1PRES, POS: extAvanco1POS },
+            avancos2: { VEL: extAvanco2VEL, PRES: extAvanco2PRES, POS: extAvanco2POS },
+          },
+          retornos: {
+            retorno1: { VEL: extRetorno1VEL, PRES: extRetorno1PRES, POS: extRetorno1POS },
+            retorno2: { VEL: extRetorno2VEL, PRES: extRetorno2PRES, POS: extRetorno2POS },
+          },
+          obsExtracaoMecanica,
+        },
+
+        // PNEUMÁTICO
+        pneumatico: {
+          ar1: { Tipo: extPneu1Tipo, Posicao: extPneu1POS, Atraso: extPneu1RET, Tempo: extPneu1TEMP },
+          ar2: { Tipo: extPneu2Tipo, Posicao: extPneu2POS, Atraso: extPneu2RET, Tempo: extPneu2TEMP },
+          ar3: { Tipo: extPneu3Tipo, Posicao: extPneu3POS, Atraso: extPneu3RET, Tempo: extPneu3TEMP },
+          ar4: { Tipo: extPneu4Tipo, Posicao: extPneu4POS, Atraso: extPneu4RET, Tempo: extPneu4TEMP },
+          ar5: { Tipo: extPneu5Tipo, Posicao: extPneu5POS, Atraso: extPneu5RET, Tempo: extPneu5TEMP },
+          ar6: { Tipo: extPneu6Tipo, Posicao: extPneu6POS, Atraso: extPneu6RET, Tempo: extPneu6TEMP },
+        },
+
+        // MACHOS - AVANÇOS
+        machosAvancos: {
+          macho1: { Modo: MachoAvanco1Modo, Cond: MachoAvanco1Cond, Curso: MachoAvanco1Curso, VEL: MachoAvanco1VEL, PRES: MachoAvanco1PRES, TEMP: MachoAvanco1TEMP },
+          macho2: { Modo: MachoAvanco2Modo, Cond: MachoAvanco2Cond, Curso: MachoAvanco2Curso, VEL: MachoAvanco2VEL, PRES: MachoAvanco2PRES, TEMP: MachoAvanco2TEMP },
+          macho3: { Modo: MachoAvanco3Modo, Cond: MachoAvanco3Cond, Curso: MachoAvanco3Curso, VEL: MachoAvanco3VEL, PRES: MachoAvanco3PRES, TEMP: MachoAvanco3TEMP },
+          macho4: { Modo: MachoAvanco4Modo, Cond: MachoAvanco4Cond, Curso: MachoAvanco4Curso, VEL: MachoAvanco4VEL, PRES: MachoAvanco4PRES, TEMP: MachoAvanco4TEMP },
+          macho5: { Modo: MachoAvanco5Modo, Cond: MachoAvanco5Cond, Curso: MachoAvanco5Curso, VEL: MachoAvanco5VEL, PRES: MachoAvanco5PRES, TEMP: MachoAvanco5TEMP },
+          macho6: { Modo: MachoAvanco6Modo, Cond: MachoAvanco6Cond, Curso: MachoAvanco6Curso, VEL: MachoAvanco6VEL, PRES: MachoAvanco6PRES, TEMP: MachoAvanco6TEMP },
+          macho7: { Modo: MachoAvanco7Modo, Cond: MachoAvanco7Cond, Curso: MachoAvanco7Curso, VEL: MachoAvanco7VEL, PRES: MachoAvanco7PRES, TEMP: MachoAvanco7TEMP },
+          macho8: { Modo: MachoAvanco8Modo, Cond: MachoAvanco8Cond, Curso: MachoAvanco8Curso, VEL: MachoAvanco8VEL, PRES: MachoAvanco8PRES, TEMP: MachoAvanco8TEMP },
+        },
+
+        // MACHOS - RETORNOS
+        machosRetornos: {
+          macho1: { Modo: MachoRetorno1Modo, Cond: MachoRetorno1Cond, Curso: MachoRetorno1Curso, VEL: MachoRetorno1VEL, PRES: MachoRetorno1PRES, TEMP: MachoRetorno1TEMP },
+          macho2: { Modo: MachoRetorno2Modo, Cond: MachoRetorno2Cond, Curso: MachoRetorno2Curso, VEL: MachoRetorno2VEL, PRES: MachoRetorno2PRES, TEMP: MachoRetorno2TEMP },
+          macho3: { Modo: MachoRetorno3Modo, Cond: MachoRetorno3Cond, Curso: MachoRetorno3Curso, VEL: MachoRetorno3VEL, PRES: MachoRetorno3PRES, TEMP: MachoRetorno3TEMP },
+          macho4: { Modo: MachoRetorno4Modo, Cond: MachoRetorno4Cond, Curso: MachoRetorno4Curso, VEL: MachoRetorno4VEL, PRES: MachoRetorno4PRES, TEMP: MachoRetorno4TEMP },
+          macho5: { Modo: MachoRetorno5Modo, Cond: MachoRetorno5Cond, Curso: MachoRetorno5Curso, VEL: MachoRetorno5VEL, PRES: MachoRetorno5PRES, TEMP: MachoRetorno5TEMP },
+          macho6: { Modo: MachoRetorno6Modo, Cond: MachoRetorno6Cond, Curso: MachoRetorno6Curso, VEL: MachoRetorno6VEL, PRES: MachoRetorno6PRES, TEMP: MachoRetorno6TEMP },
+          macho7: { Modo: MachoRetorno7Modo, Cond: MachoRetorno7Cond, Curso: MachoRetorno7Curso, VEL: MachoRetorno7VEL, PRES: MachoRetorno7PRES, TEMP: MachoRetorno7TEMP },
+          macho8: { Modo: MachoRetorno8Modo, Cond: MachoRetorno8Cond, Curso: MachoRetorno8Curso, VEL: MachoRetorno8VEL, PRES: MachoRetorno8PRES, TEMP: MachoRetorno8TEMP },
+        },
+
+        // OBSERVAÇÕES E ANOTAÇÕES
+        observacoes: {
+          obsMacho,
+          obsProcMontagem,
+          obsOptecnica,
+          obsQualidade,
+          instrucoes,
+          consideracoes,
+        },
+
+        // ATRASOS
+        atrasos: {
+          MachoAvancoAtraso,
+          MachoRetornoAtraso,
+        },
+
+        // RETORNOS E CONTROLES
+        controlesRetorno: {
+          retSaidaExtracao,
+          baixaPressao,
+          retFimAltaPressao,
+          retFimFechamento,
+          retExtrator,
+          retRecuoBico,
+          retAvancoBico,
+          retPurga,
+          aberturaLentaPorta,
+          portaAberta,
+        },
+
+        // Alarmes e configurações adicionais
+        alarmeReciclo: {
+          alarmeRetDosagem,
+          Reciclo,
+          descAnteDosagem,
+        },
+
+        // Configurações do friso
+        configFriso: {
+          ALPRFIABPRES,
+          sicExtraPres,
+          FecAuxPres,
+        },
+
+        imagens: imagens.filter(item => item.imagem || item.titulo || item.observacao),
+
+        // Timestamp
+        dataCriacao: new Date().toISOString(),
+      }
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(fichaSalva),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setFicha(data)
+        setMessage('✓ Ficha salva com sucesso!')
+        setTimeout(() => setMessage(''), 3000)
+        console.log('Ficha Salva:', data)
+      } else {
+        setMessage('✗ Erro ao salvar ficha')
+        console.error('Erro:', response.statusText)
+      }
+    } catch (error) {
+      setMessage('✗ Erro na requisição: ' + error.message)
+      console.error('Erro:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Função para recuperar dados de uma ficha específica
+  const carregarFicha = async (id, mode = 'edit') => {
+    try {
+      setLoading(true)
+      const response = await fetch(`${MOCKAPI_URL}/${id}`)
+      if (response.ok) {
+        const data = await response.json()
+        preencherFormulario(data, mode)
+        setFicha(data)
+        setFormMode(mode)
+        setEditingId(mode === 'edit' ? id : null)
+        setMessage('✓ Ficha carregada com sucesso!')
+        setTimeout(() => setMessage(''), 3000)
+      } else {
+        setMessage('✗ Ficha não encontrada')
+      }
+    } catch (error) {
+      setMessage('✗ Erro ao carregar ficha: ' + error.message)
+      console.error('Erro:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Função para preencher o formulário com dados recuperados
+  const preencherFormulario = (data, mode = 'edit') => {
+    const { cabecalho, dadosBasicos, tempos, materiaPrima, temperaturas, refrigeracao, aberturaFechamento, dosagemInjecaoRecalque, descompressao, extracaoMecanica, pneumatico, machosAvancos, machosRetornos, observacoes, atrasos, controlesRetorno, alarmeReciclo, configFriso, imagens } = data
+
+    // Preencher informações gerais
+    if (cabecalho) {
+      settipo(cabecalho.tipo)
+      setversao(mode === 'duplicate' ? incrementVersao(cabecalho.versao) : cabecalho.versao)
+      setdata(cabecalho.data)
+      setmolde(cabecalho.molde)
+      setpapi(cabecalho.papi)
+      setcodmolde(cabecalho.codmolde)
+      setcavidades(cabecalho.cavidades)
+      setmaquina(cabecalho.maquina)
+      setprograma(cabecalho.programa)
+      setElaboraPor(cabecalho.ElaboraPor)
+      setVerificadoPor(cabecalho.VerificadoPor)
+      setAprovadoPor(cabecalho.AprovadoPor)
+      setImagemCabecalho(cabecalho.imagem_cabecalho || '')
+    }
+
+    setImagens(data.imagens || [])
+
+    // Preencher dados básicos
+    if (dadosBasicos) {
+      setPilha(dadosBasicos.Pilha)
+      setlastro(dadosBasicos.lastro)
+      setmeio(dadosBasicos.meio)
+      settotal(dadosBasicos.total)
+      setpesoIdeal(dadosBasicos.pesoIdeal)
+      settolerancia(dadosBasicos.tolerancia)
+      setpressaoInjecaoReal(dadosBasicos.pressaoInjecaoReal)
+      setPH(dadosBasicos.PH)
+    }
+
+    // Preencher tempos
+    if (tempos) {
+      settAbertura(tempos.tAbertura)
+      settFechamento(tempos.tFechamento)
+      settDosagem(tempos.tDosagem)
+      settInjecao(tempos.tInjecao)
+      settRecalque(tempos.tRecalque)
+      settResfriamento(tempos.tResfriamento)
+      settExtracao(tempos.tExtracao)
+      settCiclo(tempos.tCiclo)
+      settRebarbagem(tempos.tRebarbagem)
+      settExtracaoAux(tempos.tExtracaoAux)
+      settMontagem(tempos.tMontagem)
+      settempoResfriamento(tempos.tempoResfriamento)
+      setTempoCiclo(tempos.TempoCiclo)
+    }
+
+    // Preencher matéria prima
+    if (materiaPrima) {
+      setmateriaPrima(materiaPrima.materiaPrima)
+      setsecador(materiaPrima.secador)
+      setsecTemperatura(materiaPrima.secTemperatura)
+      setsecTempo(materiaPrima.secTempo)
+      setCamaraQuente(materiaPrima.CamaraQuente)
+    }
+
+    // Preencher temperaturas
+    if (temperaturas) {
+      setbico(temperaturas.bico)
+      if (temperaturas.zonas) {
+        setz1(temperaturas.zonas.z1)
+        setz2(temperaturas.zonas.z2)
+        setz3(temperaturas.zonas.z3)
+        setz4(temperaturas.zonas.z4)
+        setz5(temperaturas.zonas.z5)
+        setz6(temperaturas.zonas.z6)
+        setz7(temperaturas.zonas.z7)
+        setz8(temperaturas.zonas.z8)
+        setz9(temperaturas.zonas.z9)
+        setz10(temperaturas.zonas.z10)
+        setz11(temperaturas.zonas.z11)
+        setz12(temperaturas.zonas.z12)
+        setz13(temperaturas.zonas.z13)
+      }
+    }
+  }
+
+  useEffect(() => {
+    const id = searchParams.get('id')
+    const mode = searchParams.get('mode')
+
+    if (id) {
+      carregarFicha(id, mode === 'duplicate' ? 'duplicate' : 'edit')
+    } else {
+      setFormMode('new')
+      setEditingId(null)
+    }
+  }, [searchParams])
 
   return (
     <>
 
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
 <div style={{background:'#555858', color:'white'}}>
-        <h3>Ficha Técnica</h3>
-        <img style={{ height: '200px', border:'4px solid gray', padding:' 10px 10px 10px 10px', margin:'10px 10px 30px 10px'}} src={moldes[1].foto} />
+        <h3>{formMode === 'edit' ? 'Editar Ficha Técnica' : formMode === 'duplicate' ? 'Duplicar Ficha Técnica' : 'Nova Ficha Técnica'}</h3>
+        <img id='imagem_cabecalho' style={{ height: '200px', border:'4px solid gray', padding:' 10px 10px 10px 10px', margin:'10px 10px 30px 10px'}} src={imagemCabecalho || moldes[1].foto} />
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '6px' }}>Imagem de Cabeçalho</label>
+          <input type='file' accept='image/*' onChange={handleImagemCabecalhoChange} />
+        </div>
         
         <div className='quadroMaior'>
           <div className='coluna'>
@@ -607,23 +840,23 @@ const [maquinas,setMaquinas] = useState([
               {/* ENTRADA */}
 
               <label>Cod:</label>
-              <select type="text" style={{ width: '200px' }}>
+              <select value={molde} onChange={(e) => setmolde(e.target.value)} style={{ width: '200px' }}>
                 {moldes.map(m => (
-                  <option key={m.id} value={m.id}>{m.molde}</option>
-                ))
-                }</select>
-                <label>Maquina</label>
-              <select type="text" style={{ width: '200px' }}>
+                  <option key={m.id} value={m.molde}>{m.molde}</option>
+                ))}
+              </select>
+              <label>Máquina</label>
+              <select value={maquina} onChange={(e) => setmaquina(e.target.value)} style={{ width: '200px' }}>
                 {maquinas.map(m => (
-                  <option key={m.id} value={m.id}>{m.maquina}</option>
-                ))
-                }</select>
+                  <option key={m.id} value={m.maquina}>{m.maquina}</option>
+                ))}
+              </select>
               <div className='pulaLinha'></div>
-                    <label>Produto:</label>
-                      <input type="text" style={{ width: '300px' }} />
-                    <div style={{ padding: '20px' }}>
-                  </div>
+              <label>Produto:</label>
+              <input type="text" style={{ width: '300px' }} value={papi} onChange={(e) => setpapi(e.target.value)} />
+              <div style={{ padding: '20px' }}>
               </div>
+            </div>
             <div className='coluna'>
               <div className='campos-container'>
 
@@ -631,18 +864,18 @@ const [maquinas,setMaquinas] = useState([
                 <div className="field-p"><label>Ciclo</label><input value={tCiclo} onChange={(e) => settCiclo(e.target.value)} type='text' /></div>
                 <div className="field-p"><label>PH</label><input value={PH} onChange={(e) => setPH(e.target.value)} type='text' /></div>
                 <div className="field-p"><label>Peso</label><input value={pesoIdeal} onChange={(e) => setpesoIdeal(e.target.value)} type='text' /></div>
-                <div className="field-p"><label>Padrão</label><input value={""} type='text' /></div>
-                <div className="field-p"><label>Embalagem</label><input value={""} type='text' /></div>
-                <div className="field-p"><label>T Dos</label><input value={tDosagem} type='text' /></div>
-                <div className="field-p"><label>T Inj</label><input value={tInjecao} type='text' /></div>
-                <div className="field-p"><label>T Ext</label><input value={tExtracao} type='text' /></div>
-                <div className="field-p"><label>T Abe</label><input value={tAbertura} type='text' /></div>
-                <div className="field-p"><label>T Fech</label><input value={tFechamento} type='text' /></div>
+                <div className="field-p"><label>Padrão</label><input type='text' /></div>
+                <div className="field-p"><label>Embalagem</label><input type='text' /></div>
+                <div className="field-p"><label>T Dos</label><input value={tDosagem} onChange={(e) => settDosagem(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Inj</label><input value={tInjecao} onChange={(e) => settInjecao(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Ext</label><input value={tExtracao} onChange={(e) => settExtracao(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Abe</label><input value={tAbertura} onChange={(e) => settAbertura(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Fech</label><input value={tFechamento} onChange={(e) => settFechamento(e.target.value)} type='text' /></div>
                 </div><br/>
                 <div style={{textAlign:'right'}}>
-                <div><label>Elaborado por:</label><input value={ElaboraPor} type='text' /></div>
-                <div><label>Aprovado por:</label><input value={AprovadoPor} type='text' /></div>
-                <div><label>Aprovado em:</label><input value={data} type='text' /></div>
+                <div><label>Elaborado por:</label><input value={ElaboraPor} onChange={(e) => setElaboraPor(e.target.value)} type='text' /></div>
+                <div><label>Aprovado por:</label><input value={AprovadoPor} onChange={(e) => setAprovadoPor(e.target.value)} type='text' /></div>
+                <div><label>Aprovado em:</label><input value={data} onChange={(e) => setdata(e.target.value)} type='text' /></div>
               </div>
             </div>
           </div>
@@ -1311,30 +1544,66 @@ const [maquinas,setMaquinas] = useState([
         </Section>
 
         <Section title="IMAGENS">
-          <div className='quadroMaior'>
-            <div className='coluna'>
-              <div className='campos-container'>
-                <div>
-                  <label>Produto</label>
-                  <div className='card'>
+          <div style={{ marginBottom: '15px' }}>
+            <button type='button' onClick={handleAddImagem} style={{ padding: '10px 16px', cursor: 'pointer', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#f0f0f0' }}>
+              Adicionar imagem
+            </button>
+          </div>
 
-                    <img style={{ height: '200px' }} src={moldes[1].foto} />
+          {imagens.length === 0 && (
+            <div style={{ marginBottom: '15px' }}>
+              Nenhuma imagem adicionada. Clique em "Adicionar imagem" para incluir fotos.
+            </div>
+          )}
+
+          {imagens.map((item, index) => (
+            <div key={item.id} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <strong>Imagem {index + 1}</strong>
+                <button type='button' onClick={() => handleRemoveImagem(item.id)} style={{ padding: '6px 10px', cursor: 'pointer' }}>
+                  Remover
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                <div style={{ minWidth: '200px' }}>
+                  <label>Preview</label>
+                  <div className='card' style={{ marginTop: '8px', minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                    <img style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }} src={item.imagem || moldes[1].foto} />
+                  </div>
+                  <div style={{ marginTop: '10px' }}>
+                    <input type='file' accept='image/*' onChange={(e) => handleImagemChange(item.id, e)} />
                   </div>
                 </div>
-                <div>
-                  <label>Embalagem</label>
-                  <div className='card'>
-
-                    <img style={{ height: '200px' }} src={moldes[1].foto} />
+                <div style={{ flex: '1 1 280px' }}>
+                  <div style={{ marginBottom: '10px' }}>
+                    <label>Título</label>
+                    <input type='text' value={item.titulo} onChange={(e) => handleImagemTituloChange(item.id, e.target.value)} style={{ width: '100%' }} />
+                  </div>
+                  <div>
+                    <label>Observação</label>
+                    <textarea className='txt-area' value={item.observacao} onChange={(e) => handleImagemObservacaoChange(item.id, e.target.value)} placeholder='Digite aqui...' />
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          ))}
         </Section>
 
-        <button onClick={handleSaveFicha} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
-          Salvar Ficha
+        {message && (
+          <div style={{
+            marginTop: '20px',
+            padding: '10px 15px',
+            backgroundColor: message.includes('✓') ? '#d4edda' : '#f8d7da',
+            color: message.includes('✓') ? '#155724' : '#721c24',
+            border: `1px solid ${message.includes('✓') ? '#c3e6cb' : '#f5c6cb'}`,
+            borderRadius: '4px'
+          }}>
+            {message}
+          </div>
+        )}
+
+        <button onClick={handleSaveFicha} disabled={loading} style={{ marginTop: '20px', padding: '10px 20px', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1 }}>
+          {loading ? 'Salvando...' : 'Salvar Ficha'}
         </button>
 
         <button style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>

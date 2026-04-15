@@ -15,6 +15,10 @@ import PadraoEmbalagem from './pages/Padroes/PadraoEmbalagem'
 import AprovacaoNovoPadrao from './pages/Padroes/AprovacaoNovoPadrao'
 import Misturas from './pages/MP/Misturas'
 import ListaFTP from './pages/FTPs/ListaFTP'
+import ControleRNC from './pages/Qualidade/ControleRNC'
+import FormularioRNC from './pages/Qualidade/FormularioRNC'
+import PAPC from './pages/Qualidade/PAPC'
+
 
 // --- Subcomponente de Dropdown para Reutilização ---
 const NavDropdown = ({ title, links }) => {
@@ -125,9 +129,17 @@ function Layout() {
             { label: "Gerar Mistura", path: "/GerarMistura" }
           ]}
         />
+                <NavDropdown
+          title="Qualidade"
+          links={[
+            {label:"Controle de RNC", path:"/ControleRNC"},
+            {label:"Formulario de RNC", path:"/FormularioRNC"},
+            {label:"PAPC - Plano de Ação Preventivo Corretivo", path:"/PAPC"}
+          ]}
+        />
 
+        </nav>
         
-      </nav>
 
 {/*** AREA RENDERIZADA DA PAGINA ***/}
 
@@ -146,6 +158,9 @@ function Layout() {
           <Route path="/AprovacaoNovoPadrao" element={<AprovacaoNovoPadrao />} />
           <Route path="/GerarMistura" element={<Misturas />} />
           <Route path="/ListaFTP" element={<ListaFTP />} />
+          <Route path='/PAPC' element={<PAPC/>}/>
+          <Route path='ControleRNC' element={<ControleRNC/>}/>
+          <Route path='FormularioRNC' element={<FormularioRNC/>}/>
         </Routes>
       </div>
     </>
