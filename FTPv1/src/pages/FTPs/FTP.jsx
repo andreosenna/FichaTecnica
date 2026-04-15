@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import Section from '../../components/Section'
 export default function FTP() {
+const  MOCKAPI_URL = "https://69c55f5e8a5b6e2dec2c4e9b.mockapi.io/gfila/api/fichaTecnica"
 
   const [moldes, setMoldes] = useState([
     { id: 1, molde: 'Cadeira Monobloco', foto: 'https://images.tcdn.com.br/img/img_prod/1286580/kit_4_cadeira_poltrona_alta_black_e_1_mesa_plastica_monobloco_preta_70x70cm_105_2_5c54f4819aae24902d782253178cae78.jpg', bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },

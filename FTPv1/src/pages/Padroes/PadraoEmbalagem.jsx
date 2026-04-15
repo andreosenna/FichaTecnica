@@ -1,52 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import supabase from '../../conexao/conexao';
 
 export default function PadraoEmbalagem() {
-    const dado1 = [{
-        produto: "Cadeira Monobloco Preta",
-        maoObra: 1,
-        codMolde: "12010201080",
-        tipo: "PA",
-        saco: 0,
-        cxHortifruti: 0,
-        pilha: 25,
-        pallet: 0,
-        gaiola: 0,
-        total: 25,
-        embalagem: "Não há",
-        observacao: "empilhar após 30 min",
-        cavidades: 1,
-        pesoMedio: 2.10,
-        cicloMedio: 57.8,
-        ph: 62,
-        maquina1: "J800-1",
-        maquina2: "J800-2",
-        maquina3: "J800-5",
-        maquina4: 0
-    },
-
-    {
-        produto: "Cadeira Monobloco Branca",
-        maoObra: 1,
-        codMolde: "12010201080",
-        tipo: "PA",
-        saco: 0,
-        cxHortifruti: 0,
-        pilha: 25,
-        pallet: 0,
-        gaiola: 0,
-        total: 25,
-        embalagem: "Não há",
-        observacao: "empilhar após 30 min",
-        cavidades: 1,
-        pesoMedio: 2.10,
-        cicloMedio: 57.8,
-        ph: 62,
-        maquina1: "J800-1",
-        maquina2: "J800-2",
-        maquina3: "J800-5",
-        maquina4: 0
-    }
-    ]
+    const [padrao, setPadrao] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const [produto, setProduto] = useState("");
     const [maoObra, setMaoObra] = useState("");
@@ -69,72 +26,132 @@ export default function PadraoEmbalagem() {
     const [maquina3, setMaquina3] = useState("");
     const [maquina4, setMaquina4] = useState("");
     const [produtoEditado, setProdutoEditado] = useState(null);
-    const [padrao, setPadrao] = useState([]);
     const [modoEdicao, setModoEdicao] = useState(false);
     const [indexEdicao, setIndexEdicao] = useState(null);
     const [formularioVisivel, setFormularioVisivel] = useState(false);
 
     useEffect(() => {
-        setPadrao(dado1)
+        carregarPadroes();
     }, [])
+
+    const carregarPadroes = async () => {
+        try {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from('tb_padraoEmbalagem')
+                .select('*')
+                .eq('statusPadrao', 'aprovado')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Erro ao carregar padrões:', error);
+                return;
+            }
+
+            // Mapear dados do Supabase para o formato do componente
+            const padroesMapeados = data.map(item => ({
+                id: item.id,
+                produto: item.descProduto,
+                maoObra: item.mdo,
+                codMolde: item.codMolde,
+                tipo: item.tipoProduto,
+                saco: item.sacoPlastico,
+                cxHortifruti: item.cxHortifruti,
+                pilha: item.pilha,
+                pallet: item.pallet,
+                gaiola: item.gaiola,
+                total: item.totalEmbalagem,
+                embalagem: item.tipoEmbalagem,
+                observacao: item.obsPadrao,
+                cavidades: item.nCav,
+                pesoMedio: item.pesoMedio,
+                cicloMedio: item.cicloProdutivo,
+                ph: item.phProdutivo,
+                maquina1: item.Maq1,
+                maquina2: item.Maq2,
+                maquina3: item.Maq3,
+                maquina4: item.Maq4,
+                status: item.statusPadrao,
+                created_at: item.created_at
+            }));
+
+            setPadrao(padroesMapeados);
+        } catch (error) {
+            console.error('Erro ao carregar padrões:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 const handleAddPadrao = () => {
     const novoPadrao = {
-        id: Date.now(),
-        produto,
-        maoObra,
+        descProduto: produto,
+        mdo: parseInt(maoObra) || 0,
         codMolde,
-        tipo,
-        saco,
-        cxHortifruti,
-        pilha,
-        pallet,
-        gaiola,
-        total,
-        embalagem,
-        observacao,
-        cavidades,
-        pesoMedio,
-        cicloMedio,
-        ph,
-        maquina1,
-        maquina2,
-        maquina3,
-        maquina4,
-        status: "pendente",
-        dataEdicao: new Date().toLocaleString('pt-BR')
+        tipoProduto: tipo,
+        sacoPlastico: parseInt(saco) || 0,
+        cxHortifruti: parseInt(cxHortifruti) || 0,
+        pilha: parseInt(pilha) || 0,
+        pallet: parseInt(pallet) || 0,
+        gaiola: parseInt(gaiola) || 0,
+        totalEmbalagem: parseInt(total) || 0,
+        tipoEmbalagem: embalagem,
+        obsPadrao: observacao,
+        nCav: parseInt(cavidades) || 0,
+        pesoMedio: parseFloat(pesoMedio) || 0,
+        cicloProdutivo: parseFloat(cicloMedio) || 0,
+        phProdutivo: parseInt(ph) || 0,
+        Maq1: maquina1,
+        Maq2: maquina2,
+        Maq3: maquina3,
+        Maq4: maquina4,
+        statusPadrao: "pendente"
     };
 
     if (modoEdicao) {
         // Se está editando, adiciona à fila de aprovação
-        const dataEdicao = {
-            ...novoPadrao,
-            padraoAnterior: produtoEditado,
-            tipo: 'edicao'
-        };
-        adicionarSolicitacao(dataEdicao);
+        adicionarSolicitacao(novoPadrao, 'edicao', produtoEditado);
     } else {
         // Se está adicionando novo padrão, adiciona à fila de aprovação
-        const dataNova = {
-            ...novoPadrao,
-            tipo: 'nova'
-        };
-        adicionarSolicitacao(dataNova);
+        adicionarSolicitacao(novoPadrao, 'nova');
     }
 };
 
-const adicionarSolicitacao = (solicitacao) => {
-    // Recupera fila existente
-    const filaExistente = localStorage.getItem('filaAprovisacao');
-    const fila = filaExistente ? JSON.parse(filaExistente) : [];
+const adicionarSolicitacao = async (dadosBanco, tipoSolicitacao, padraoAnterior = null) => {
+    try {
+        // Se for edição, marca o padrão anterior como obsoleto
+        if (tipoSolicitacao === 'edicao' && padraoAnterior) {
+            const { error: updateError } = await supabase
+                .from('tb_padraoEmbalagem')
+                .update({ statusPadrao: 'obsoleto' })
+                .eq('id', padraoAnterior.id);
 
-    // Adiciona nova solicitação
-    fila.push(solicitacao);
-    localStorage.setItem('filaAprovisacao', JSON.stringify(fila));
+            if (updateError) {
+                console.error('Erro ao atualizar padrão anterior:', updateError);
+                alert('Erro ao processar a edição. Tente novamente.');
+                return;
+            }
+        }
 
-    // Limpa formulário e mostra mensagem de sucesso
-    limparFormulario();
-    setFormularioVisivel(false);
-    alert(`Solicitação de ${solicitacao.tipo === 'edicao' ? 'edição' : 'novo padrão'} para "${solicitacao.produto}" adicionada à fila de aprovação!`);
+        // Insere o novo padrão (novo ou edição)
+        const { data, error } = await supabase
+            .from('tb_padraoEmbalagem')
+            .insert([dadosBanco])
+            .select();
+
+        if (error) {
+            console.error('Erro ao adicionar solicitação:', error);
+            alert('Erro ao adicionar solicitação. Tente novamente.');
+            return;
+        }
+
+        // Limpa formulário e mostra mensagem de sucesso
+        limparFormulario();
+        setFormularioVisivel(false);
+        alert(`Solicitação de ${tipoSolicitacao === 'edicao' ? 'edição' : 'novo padrão'} para "${dadosBanco.descProduto}" adicionada com sucesso!`);
+    } catch (error) {
+        console.error('Erro ao adicionar solicitação:', error);
+        alert('Erro ao adicionar solicitação. Tente novamente.');
+    }
 };
 
 const handleEditar = (pad) => {
@@ -205,6 +222,11 @@ const limparFormulario = () => {
                         📋 Aprovações Pendentes
                     </button>
                 </div>
+                {loading ? (
+                    <div style={{ textAlign: 'center', padding: '50px' }}>
+                        <p>Carregando padrões de embalagem...</p>
+                    </div>
+                ) : (
                 <table>
                     <thead>
                         <tr>
@@ -263,6 +285,7 @@ const limparFormulario = () => {
                         ))}
                     </tbody>
                 </table>
+                )}
           <button onClick={handleOcultar}>{formularioVisivel ? "Cancelar" : "Novo"}</button>
 
 {/*  AREA DE ADIÇÃO E EDIÇÃO*/ }

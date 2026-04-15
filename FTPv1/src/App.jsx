@@ -3,7 +3,7 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import React, { useState } from 'react'
 import Home from './pages/Home'
-import FTP from './pages/FTP/FTP'
+import FTP from './pages/FTPs/FTP'
 import Apontamentos from './pages/OP/Apontamentos'
 import Login from './pages/Login'
 import Painel from './pages/OP/Painel'
@@ -11,8 +11,10 @@ import Teste from './pages/Teste'
 import OPs from './pages/OP/OPs'
 import OrdemServico from './pages/OS/OrdemServico'
 import './App.css'
-import PadraoEmbalagem from './pages/FTP/PadraoEmbalagem'
-import AprovacaoNovoPadrao from './pages/FTP/AprovacaoNovoPadrao'
+import PadraoEmbalagem from './pages/Padroes/PadraoEmbalagem'
+import AprovacaoNovoPadrao from './pages/Padroes/AprovacaoNovoPadrao'
+import Misturas from './pages/MP/Misturas'
+import ListaFTP from './pages/FTPs/ListaFTP'
 
 // --- Subcomponente de Dropdown para Reutilização ---
 const NavDropdown = ({ title, links }) => {
@@ -90,12 +92,18 @@ function Layout() {
         <NavDropdown 
           title="Fichas Técnicas" 
           links={[
+            { label: "Lista de FTPs", path: "/ListaFTP" },
             { label: "Fichas Técnicas", path: "/FTP" },
-            { label: "Teste", path: "/Teste" },
-            { label: "Padrão de Embalagem", path: "/PadraoEmbalagem" },
-            { label: "Aprovação de Novo Padrão", path: "/AprovacaoNovoPadrao" }
+            { label: "Teste", path: "/Teste" }
           ]} 
         />
+        <NavDropdown
+          title="Padrões"
+          links={[
+            {label: "Padrões de Embalagem", path: "/PadraoEmbalagem"},
+            {label: "Aprovação de Novo Padrão", path: "/AprovacaoNovoPadrao"}
+          ]}
+        />  
 
         {/* 3º Menu: Ordens de Produção */}
         <NavDropdown 
@@ -109,6 +117,12 @@ function Layout() {
           title="Ordens de Serviço"
           links={[
             { label: "Ordem de Serviço", path: "/OrdemServico" }
+          ]}
+        />
+        <NavDropdown
+          title="Materiais"
+          links={[
+            { label: "Gerar Mistura", path: "/GerarMistura" }
           ]}
         />
 
@@ -130,6 +144,8 @@ function Layout() {
           <Route path="/OrdemServico" element={<OrdemServico />} />
           <Route path="/PadraoEmbalagem" element={<PadraoEmbalagem />} />
           <Route path="/AprovacaoNovoPadrao" element={<AprovacaoNovoPadrao />} />
+          <Route path="/GerarMistura" element={<Misturas />} />
+          <Route path="/ListaFTP" element={<ListaFTP />} />
         </Routes>
       </div>
     </>
