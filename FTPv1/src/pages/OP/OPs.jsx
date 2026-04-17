@@ -4,8 +4,6 @@ import Section from '../../components/Section'
 import supabase from '../../conexao/conexao'
 
 export default function OPs(){
-//const URL = 'https://69cebbb833a09f831b7debab.mockapi.io/'
-const URL = 'stfnoisqnmnktvavnzaz/'
 const [listaProdutos,setListaProdutos] = useState([])
 const [novaOp,setNovaOP] = useState([])
 const[nomeProduto,setNomeProduto] = useState('')
@@ -17,23 +15,16 @@ const [MPAlocada,setMPAlocada] = useState('')
 const [MPApontada,setMPApontada] = useState('')
 const [PerdaKg,setPerdaKg] = useState('')
 const [PerdaPercentual,setPerdaPercentual] = useState('')
-const navigate = useNavigate()
 const [OPs,setOPs] = useState([])
 const [loading,setLoading]=  useState(true)
 const [error,setError] = useState(null)
 
-/*useEffect(()=>{
-fetch(`${URL}Produtos`)
-.then(res=> res.json())
-.then(data=> setListaProdutos(data))
-},[])*/
+const navigate = useNavigate()
 
 useEffect(()=>{
 const fetchProdutos = async ()=>{
- 
-    const {data} = await supabase.from('Produtos').select('*')
+const {data} = await supabase.from('tb_produtos').select('*')
     setListaProdutos(data)
- 
 }
 fetchProdutos()
 },[])
@@ -42,7 +33,7 @@ useEffect(() => {
   const fetchOPs = async () => {
     try {
       setLoading(true); // Garante que o loading comece ao iniciar a busca
-      const { data, error } = await supabase.from('OPs').select('*');
+      const { data, error } = await supabase.from('tb_oppai').select('*');
       
       if (error) throw error;
 
@@ -90,7 +81,7 @@ const handleCriarOP = async () => { // Adicionamos async aqui
 
     // No Supabase, você usa await em vez de .then() para ficar mais limpo
     const { data, error } = await supabase
-      .from('OPs')
+      .from('tb_oppai')
       .insert([novaOP]) // O Supabase exige que seja um array []
       .select();       // IMPORTANTE: Sem o .select(), o 'data' volta vazio!
 
@@ -196,20 +187,16 @@ const handleAtualizarCodProduto = (e)=>{
         />
         <datalist id='produtos'>
           {listaProdutos.map(produto => (
-            <option key={produto.id} value={produto.nomeProduto}/>
+            <option key={produto.id} value={produto.descProduto}/>
           ))}
         </datalist>
       </div>
 
       <div style={formStyles.field}>
         <label style={formStyles.label}>Código do Produto</label>
-        <input 
-          style={formStyles.input}
-          value={codProduto} 
-          onChange={(e) => setCodProduto(e.target.value)} 
-          type="text" 
-          placeholder="Ex: PROD-123"
-        />
+        <text>{listaProdutos.find(p => p.descProduto === nomeProduto)?.codProdutoExterno || 'Preencha o nome do produto'}</text> 
+          
+        
       </div>
 
       <div style={formStyles.field}>

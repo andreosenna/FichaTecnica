@@ -1,14 +1,20 @@
 import React, {useState,useEffect} from 'react'
 import supabase from '../../conexao/conexao'
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 
 export default function ControleRNC(){
 
-<h1>Controle RNC</h1>
-    const [listaRNC,setListaRNC] = useState([])
+const [listaRNC,setListaRNC] = useState([])
+
+const navigate = useNavigate()
 
 useEffect (()=>{
 buscarRNCs()    
 },[])
+
+const handleRNC = (RNCSelecionada)=>{
+navigate (`/RNCCompleta/${RNCSelecionada.id}`, {state: {data:RNCSelecionada}})
+}
 
 
 const buscarRNCs = async () =>{
@@ -25,6 +31,7 @@ const buscarRNCs = async () =>{
 }
 
 
+
 return(
 <>
 <h1>Relação de RNCs</h1>
@@ -38,6 +45,7 @@ return(
             <th>Data de Abertura</th>
             <th>Origem</th>
             <th>Destino</th>
+            <th>Ações</th>
 
         </tr>
     </thead>
@@ -50,6 +58,7 @@ return(
         <td>{new Date(rncs.created_at).toLocaleDateString('pt-BR')}</td>
         <td>{rncs.origemRNC}</td>
         <td>{rncs.destinoRNC}</td>
+        <td><button onClick={e=> handleRNC(rncs)} >Abrir</button></td>
      </tr>   )
     )}
    </tbody>

@@ -1,5 +1,5 @@
 import React,{useState} from "react";
-import supabase from "../conexao/conexao";
+import supabase from "../../conexao/conexao";
 
 export default function Login(){
 const [nome, setNome] = useState("");

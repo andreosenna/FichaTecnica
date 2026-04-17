@@ -65,13 +65,48 @@ const handleSalvar = async ()=>{
 
 return(
 <>
+<div>
 <h1>Formulario RNC</h1>
 <div><label>Nº RNC</label><input type="text" placeholder={"#"} readOnly></input></div>
 <div><label>Status</label><input type="text" placeholder={"Criando"} readOnly></input></div>
 <div><label>Data Criação</label><input type="date" value={dataCriacao} onChange={(e) => setDataCriacao(e.target.value)}/></div>
 <div><label>Criador</label><input type="text" value={criadorRNC} onChange={(e) => setCriadorRNC(e.target.value)}/></div>
-<div><label>Origem</label><input type="text" value={origemRNC} onChange={(e) => setOrigemRNC(e.target.value)}/></div>
-<div><label>Destino</label><input type="text" value={destinoRNC} onChange={(e) => setDestinoRNC(e.target.value)}/></div>
+<div><label>Origem</label><input type="text" list='origens' value={origemRNC} onChange={(e) => setOrigemRNC(e.target.value)}/></div>
+<datalist id='origens'>
+    <option value="Qualidade">Qualidade</option>
+    <option value="Producao">Produção</option>
+    <option value="Recursos Humanos">Recursos Humanos</option>
+    <option value="Comercial">Comercial</option>
+    <option value="Diretoria">Diretoria</option>
+    <option value="Gerencia">Gerência</option>
+    <option value="Laboratorio">Laboratório</option>
+    <option value="Exoeducao">Expedição</option>
+    <option value="Separacao">Separação</option>
+    <option value="Mecanica"> Manutenção MecÂnica</option>
+    <option value="Eletrica">Elétrica</option>
+    <option value="Ferramentaria">Ferramentaria</option>
+    <option value="Segurancao do Trabalho">Segurança do Trabalho</option>
+    <option value="Estoque Acabados">Estoque de Acabados</option>
+    <option value="Montagem">Montagem</option>
+</datalist>
+<div><label>Destino</label><input type="text" list='destinos' value={destinoRNC} onChange={(e) => setDestinoRNC(e.target.value)}/></div>
+<datalist id='destinos'>
+    <option value="Qualidade">Qualidade</option>
+    <option value="Producao">Produção</option>
+    <option value="Recursos Humanos">Recursos Humanos</option>
+    <option value="Comercial">Comercial</option>
+    <option value="Diretoria">Diretoria</option>
+    <option value="Gerencia">Gerência</option>
+    <option value="Laboratorio">Laboratório</option>
+    <option value="Exoeducao">Expedição</option>
+    <option value="Separacao">Separação</option>
+    <option value="Mecanica"> Manutenção MecÂnica</option>
+    <option value="Eletrica">Elétrica</option>
+    <option value="Ferramentaria">Ferramentaria</option>
+    <option value="Segurancao do Trabalho">Segurança do Trabalho</option>
+    <option value="Estoque Acabados">Estoque de Acabados</option>
+    <option value="Montagem">Montagem</option>
+</datalist>
 <div><label>Relato Breve da RNC</label><textarea type="text" value={relatoRNC} onChange={(e) => setRelatoRNC(e.target.value)}/></div>
 <div><label>Tipo RNC</label><input type="text" value={tipoRNC} list='tipos' onChange={(e) => setTipoRNC(e.target.value)}/></div>
 <datalist id="tipos">
@@ -86,7 +121,7 @@ return(
 <div><label>Referencia</label><textarea type="text" value={referenciaRNC} onChange={(e) => setReferenciaRNC(e.target.value)}/></div>
 <button onClick={e=>handleSalvar()}>Salvar RNC</button>
 
-
+</div>
 </>
 
 )

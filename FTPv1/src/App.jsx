@@ -2,12 +2,12 @@
 // import {useLocation} from 'react-router-dom'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import React, { useState } from 'react'
-import Home from './pages/Home'
+import Home from './pages/ADM/Home'
 import FTP from './pages/FTPs/FTP'
 import Apontamentos from './pages/OP/Apontamentos'
-import Login from './pages/Login'
+import Login from './pages/ADM/Login'
 import Painel from './pages/OP/Painel'
-import Teste from './pages/Teste'
+import Usuarios from './pages/ADM/Usuarios'
 import OPs from './pages/OP/OPs'
 import OrdemServico from './pages/OS/OrdemServico'
 import './App.css'
@@ -18,7 +18,8 @@ import ListaFTP from './pages/FTPs/ListaFTP'
 import ControleRNC from './pages/Qualidade/ControleRNC'
 import FormularioRNC from './pages/Qualidade/FormularioRNC'
 import PAPC from './pages/Qualidade/PAPC'
-
+import RNCCompleta from './pages/Qualidade/RNCCompleta'
+import Recursos from './pages/ADM/Recursos'
 
 // --- Subcomponente de Dropdown para Reutilização ---
 const NavDropdown = ({ title, links }) => {
@@ -88,7 +89,9 @@ function Layout() {
           title="Home" 
           links={[
             { label: "Home", path: "/" },
-            { label: "Login", path: "/Login" }
+            { label: "Login", path: "/Login" },
+            { label: "Recursos", path: "/Recursos" },
+            { label: "Usuários", path: "/Usuarios" }
           ]} 
         />
 
@@ -97,8 +100,8 @@ function Layout() {
           title="Fichas Técnicas" 
           links={[
             { label: "Lista de FTPs", path: "/ListaFTP" },
-            { label: "Fichas Técnicas", path: "/FTP" },
-            { label: "Teste", path: "/Teste" }
+            { label: "Fichas Técnicas", path: "/FTP" }
+            
           ]} 
         />
         <NavDropdown
@@ -151,8 +154,10 @@ function Layout() {
           <Route path="/OPs" element={<OPs />} />
           <Route path="/Painel" element={<Painel />} />
           <Route path="/Login" element={<Login />} />
+          <Route path="/Recursos" element={<Recursos />} />
           <Route path="/Apontamentos/:op" element={<Apontamentos />} />
-          <Route path="/Teste" element={<Teste />} />
+          <Route path="/RNCCompleta/:id" element={<RNCCompleta />} />
+          <Route path="/Usuarios" element={<Usuarios />} />
           <Route path="/OrdemServico" element={<OrdemServico />} />
           <Route path="/PadraoEmbalagem" element={<PadraoEmbalagem />} />
           <Route path="/AprovacaoNovoPadrao" element={<AprovacaoNovoPadrao />} />
