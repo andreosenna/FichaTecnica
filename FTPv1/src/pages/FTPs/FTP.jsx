@@ -1,7 +1,11 @@
-//import { useEffect } from 'react'
-import React, { useState } from 'react'
-import Section from '../components/Section'
+import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import Section from '../../components/Section'
+import supabase from '../../conexao/conexao'
+
 export default function FTP() {
+
+  
 
   const [moldes, setMoldes] = useState([
     { id: 1, molde: 'Cadeira Monobloco', foto: 'https://images.tcdn.com.br/img/img_prod/1286580/kit_4_cadeira_poltrona_alta_black_e_1_mesa_plastica_monobloco_preta_70x70cm_105_2_5c54f4819aae24902d782253178cae78.jpg', bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },
@@ -27,11 +31,11 @@ const [maquinas,setMaquinas] = useState([
   const [tipo, settipo] = useState()
   const [versao, setversao] = useState()
   const [data, setdata] = useState()
-  const [molde, setmolde] = useState()
+  const [molde, setmolde] = useState(moldes[0]?.molde || '')
   const [papi, setpapi] = useState()
   const [codmolde, setcodmolde] = useState()
   const [cavidades, setcavidades] = useState()
-  const [maquina, setmaquina] = useState()
+  const [maquina, setmaquina] = useState(maquinas[0]?.maquina || '')
   const [programa, setprograma] = useState()
   const [Pilha, setPilha] = useState()
   const [lastro, setlastro] = useState()
@@ -343,7 +347,7 @@ const [maquinas,setMaquinas] = useState([
   const [MachoRetorno8TEMP, setMachoRetorno8TEMP] = useState()
   const [obsMacho, setobsMacho] = useState()
   const [obsProcMontagem, setobsProcMontagem] = useState()
-  const [obsOptecnica, obsOptecnicaset] = useState()
+  const [obsOptecnica, setobsOptecnica] = useState()
   const [obsQualidade, setobsQualidade] = useState()
 
   const [MachoAvancoAtraso, setMachoAvancoAtraso] = useState()
@@ -354,251 +358,456 @@ const [maquinas,setMaquinas] = useState([
   const [VerificadoPor, setVerificadoPor] = useState()
   const [AprovadoPor, setAprovadoPor] = useState()
 
-  const[ficha, setFicha] = useState([])
+  const [imagemCabecalho, setImagemCabecalho] = useState('')
+  const [imagens, setImagens] = useState([])
 
-  const handleSaveFicha = () => {
-    const fichaSalva = {
-      // INFORMAÇÕES GERAIS
-      cabecalho: {
+  const [ficha, setFicha] = useState(null)
+  const [formMode, setFormMode] = useState('new')
+  const [editingId, setEditingId] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [searchParams] = useSearchParams()
+
+  // Função para redimensionar imagem e fazer upload para Supabase
+  const uploadImagemSupabase = async (file) => {
+    try {
+      setMessage('⏳ Fazendo upload de imagem...')
+      
+      // Redimensionar imagem
+      const reader = new FileReader()
+      const resizedBlob = await new Promise((resolve, reject) => {
+        reader.onload = () => {
+          const img = new Image()
+          img.onload = () => {
+            const maxDimension = 600
+            let width = img.width
+            let height = img.height
+
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((maxDimension / width) * height)
+                width = maxDimension
+              } else {
+                width = Math.round((maxDimension / height) * width)
+                height = maxDimension
+              }
+            }
+
+            const canvas = document.createElement('canvas')
+            canvas.width = width
+            canvas.height = height
+            const ctx = canvas.getContext('2d')
+            ctx.drawImage(img, 0, 0, width, height)
+            canvas.toBlob(blob => resolve(blob), 'image/webp', 0.5)
+          }
+          img.onerror = reject
+          img.src = reader.result
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+      
+      // Gerar nome único para o arquivo
+      const timestamp = Date.now()
+      const randomStr = Math.random().toString(36).substring(2, 8)
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${timestamp}-${randomStr}.${fileExt}`
+      
+      // Fazer upload para o bucket "fotos"
+      const { data, error } = await supabase.storage
+        .from('fotos')
+        .upload(fileName, resizedBlob, { cacheControl: '3600', upsert: false })
+      
+      if (error) throw error
+      
+      // Obter URL pública
+      const { data: publicUrlData } = supabase.storage
+        .from('fotos')
+        .getPublicUrl(fileName)
+      
+      setMessage('✓ Imagem enviada com sucesso!')
+      setTimeout(() => setMessage(''), 2000)
+      
+      return publicUrlData.publicUrl
+    } catch (error) {
+      setMessage('✗ Erro ao fazer upload: ' + error.message)
+      console.error('Erro:', error)
+      return null
+    }
+  }
+
+  const handleImagemCabecalhoChange = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const url = await uploadImagemSupabase(file)
+    if (url) setImagemCabecalho(url)
+  }
+
+  const handleAddImagem = () => {
+    setImagens(prev => [...prev, { id: Date.now(), imagem: '', titulo: '', observacao: '' }])
+  }
+
+  const handleRemoveImagem = (id) => {
+    setImagens(prev => prev.filter(item => item.id !== id))
+  }
+
+  const handleImagemChange = async (id, event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const url = await uploadImagemSupabase(file)
+    if (url) setImagens(prev => prev.map(item => item.id === id ? { ...item, imagem: url } : item))
+  }
+
+  const handleImagemTituloChange = (id, value) => {
+    setImagens(prev => prev.map(item => item.id === id ? { ...item, titulo: value } : item))
+  }
+
+  const handleImagemObservacaoChange = (id, value) => {
+    setImagens(prev => prev.map(item => item.id === id ? { ...item, observacao: value } : item))
+  }
+
+  // Função para enviar dados para a API
+  const incrementVersao = (valorAtual) => {
+    if (!valorAtual) return '1'
+    const match = valorAtual.match(/(\d+)(?!.*\d)/)
+    if (!match) return `${valorAtual} (nova)`
+    const number = parseInt(match[1], 10)
+    return `${valorAtual.slice(0, match.index)}${number + 1}${valorAtual.slice(match.index + match[1].length)}`
+  }
+
+  const handleSaveFicha = async () => {
+    try {
+      setLoading(true)
+      const isEditMode = formMode === 'edit' && editingId
+      
+      // Mapear campos do formulário para os campos da tabela tb_FTP
+      const fichaSalva = {
         tipo,
         versao,
         data,
-        molde,
+        molde: molde ? parseInt(molde) : null,
+        maquina: maquina ? parseInt(maquina) : null,
         papi,
         codmolde,
-        cavidades,
-        maquina,
+        cavidades: cavidades ? parseInt(cavidades) : null,
         programa,
-        ElaboraPor,
-        VerificadoPor,
-        AprovadoPor,
-      },
-
-      // DADOS BÁSICOS
-      dadosBasicos: {
-        Pilha,
-        lastro,
-        meio,
-        total,
-        pesoIdeal,
-        tolerancia,
-        pressaoInjecaoReal,
-        PH,
-      },
-
-      // TEMPOS
-      tempos: {
-        tAbertura,
-        tFechamento,
-        tDosagem,
-        tInjecao,
-        tRecalque,
-        tResfriamento,
-        tExtracao,
-        tCiclo,
-        tRebarbagem,
-        tExtracaoAux,
-        tMontagem,
-        tempoResfriamento,
-        TempoCiclo,
-      },
-
-      // MATÉRIA PRIMA E TEMPERATURAS
-      materiaPrima: {
-        materiaPrima,
+        pilha: Pilha ? parseFloat(Pilha) : null,
+        lastro: lastro ? parseFloat(lastro) : null,
+        meio: meio ? parseFloat(meio) : null,
+        total: total ? parseFloat(total) : null,
+        peso_ideal: pesoIdeal ? parseFloat(pesoIdeal) : null,
+        tolerancia: tolerancia ? parseFloat(tolerancia) : null,
+        t_abertura: tAbertura ? parseFloat(tAbertura) : null,
+        t_fechamento: tFechamento ? parseFloat(tFechamento) : null,
+        t_dosagem: tDosagem ? parseFloat(tDosagem) : null,
+        t_injecao: tInjecao ? parseFloat(tInjecao) : null,
+        t_recalque: tRecalque ? parseFloat(tRecalque) : null,
+        t_resfriamento: tResfriamento ? parseFloat(tResfriamento) : null,
+        t_extracao: tExtracao ? parseFloat(tExtracao) : null,
+        t_ciclo: tCiclo ? parseFloat(tCiclo) : null,
+        ph: PH ? parseFloat(PH) : null,
+        materia_prima: materiaPrima,
+        bico: bico ? parseFloat(bico) : null,
+        z1: z1 ? parseFloat(z1) : null,
+        z2: z2 ? parseFloat(z2) : null,
+        z3: z3 ? parseFloat(z3) : null,
+        z4: z4 ? parseFloat(z4) : null,
+        z5: z5 ? parseFloat(z5) : null,
+        z6: z6 ? parseFloat(z6) : null,
+        z7: z7 ? parseFloat(z7) : null,
+        z8: z8 ? parseFloat(z8) : null,
+        z9: z9 ? parseFloat(z9) : null,
+        z10: z10 ? parseFloat(z10) : null,
+        z11: z11 ? parseFloat(z11) : null,
+        z12: z12 ? parseFloat(z12) : null,
+        z13: z13 ? parseFloat(z13) : null,
         secador,
-        secTemperatura,
-        secTempo,
-        CamaraQuente,
-      },
-
-      // ZONA DE TEMPERATURAS
-      temperaturas: {
-        bico,
-        zonas: { z1, z2, z3, z4, z5, z6, z7, z8, z9, z10, z11, z12, z13 },
-        camerasQuentes: {
-          c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13,
-          c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27,
-        },
-        obsTemperaturas,
-      },
-
-      // REFRIGERAÇÃO
-      refrigeracao: {
+        sec_temperatura: secTemperatura ? parseFloat(secTemperatura) : null,
+        sec_tempo: secTempo ? parseFloat(secTempo) : null,
+        c1: c1 ? parseFloat(c1) : null,
+        c2: c2 ? parseFloat(c2) : null,
+        c3: c3 ? parseFloat(c3) : null,
+        c4: c4 ? parseFloat(c4) : null,
+        c5: c5 ? parseFloat(c5) : null,
+        c6: c6 ? parseFloat(c6) : null,
+        c7: c7 ? parseFloat(c7) : null,
+        c8: c8 ? parseFloat(c8) : null,
+        c9: c9 ? parseFloat(c9) : null,
+        c10: c10 ? parseFloat(c10) : null,
+        c11: c11 ? parseFloat(c11) : null,
+        c12: c12 ? parseFloat(c12) : null,
+        c13: c13 ? parseFloat(c13) : null,
+        c14: c14 ? parseFloat(c14) : null,
+        c15: c15 ? parseFloat(c15) : null,
+        c16: c16 ? parseFloat(c16) : null,
+        c17: c17 ? parseFloat(c17) : null,
+        c18: c18 ? parseFloat(c18) : null,
+        c19: c19 ? parseFloat(c19) : null,
+        c20: c20 ? parseFloat(c20) : null,
+        c21: c21 ? parseFloat(c21) : null,
+        c22: c22 ? parseFloat(c22) : null,
+        c23: c23 ? parseFloat(c23) : null,
+        c24: c24 ? parseFloat(c24) : null,
+        c25: c25 ? parseFloat(c25) : null,
+        c26: c26 ? parseFloat(c26) : null,
+        c27: c27 ? parseFloat(c27) : null,
+        obs_temperaturas: obsTemperaturas,
         refrigeracao,
-        obsRefrigeracao,
-      },
-
-      // ABERTURA E FECHAMENTO
-      aberturaFechamento: {
-        abertura: {
-          ab1: { VEL: ab1VEL, PRES: ab1PRES, POS: ab1POS },
-          ab2: { VEL: ab2VEL, PRES: ab2PRES, POS: ab2POS },
-          ab3: { VEL: ab3VEL, PRES: ab3PRES, POS: ab3POS },
-          ab4: { VEL: ab4VEL, PRES: ab4PRES, POS: ab4POS },
-          ab5: { VEL: abFimVEL, PRES: abFimPRES, POS: abFimPOS },
-        },
-        fechamento: {
-          fecha1: { VEL: fecha1VEL, PRES: fecha1PRES, POS: fecha1POS },
-          fecha2: { VEL: fecha2VEL, PRES: fecha2PRES, POS: fecha2POS },
-          fecha3: { VEL: fecha3VEL, PRES: fecha3PRES, POS: fecha3POS },
-          fecha4: { VEL: fecha4VEL, PRES: fecha4PRES, POS: fecha4POS },
-          fecha5: { VEL: fechaFimVEL, PRES: fechaFimPRES, POS: fechaFimPOS },
-        },
-        obsAbreFecha,
-        FechaAexPres,
-        FechaBaixaPresPres,
-        FechaForcaFechaPres,
-      },
-
-      // DOSAGEM, INJEÇÃO E RECALQUE
-      dosagemInjecaoRecalque: {
-        dosagem: {
-          dosagem1: { VEL: dosagem1VEL, PRES: dosagem1PRES, CtP: dosagem1CONPRES, POS: dosagem1POS },
-          dosagem2: { VEL: dosagem2VEL, PRES: dosagem2PRES, CtP: dosagem2CONPRES, POS: dosagem2POS },
-          dosagem3: { VEL: dosagem3VEL, PRES: dosagem3PRES, CtP: dosagem3CONPRES, POS: dosagem3POS },
-          retDosagem,
-        },
-        injecao: {
-          tipoInjecao,
-          injecao1: { VEL: injecao1VEL, PRES: injecao1PRES, POS: injecao1POS },
-          injecao2: { VEL: injecao2VEL, PRES: injecao2PRES, POS: injecao2POS },
-          injecao3: { VEL: injecao3VEL, PRES: injecao3PRES, POS: injecao3POS },
-          injecao4: { VEL: injecao4VEL, PRES: injecao4PRES, POS: injecao4POS },
-          InjecaoPressaoMax,
-          InjecaoTempoProgramado,
-          injecaoComutacao,
-          InjecaoLeakage,
-          injecaoColchao,
-        },
-        recalque: {
-          recalqueTipo,
-          recalque1: { VEL: recalque1VEL, PRES: recalque1PRES, TEMP: recalque1TEMP },
-          recalque2: { VEL: recalque2VEL, PRES: recalque2PRES, TEMP: recalque2TEMP },
-          recalque3: { VEL: recalque3VEL, PRES: recalque3PRES, TEMP: recalque3TEMP },
-          recalque4: { VEL: recalque4VEL, PRES: recalque4PRES, TEMP: recalque4TEMP },
-          obsRecalque,
-        },
-      },
-
-      // DESCOMPRESSÃO
-      descompressao: {
-        descDianteiraSimNao,
-        descTraseiraSimNao,
-        descTraseira: { VEL: descTraseiraVEL, PRES: descTraseiraPRES, POS: descTraseiraPOS },
-      },
-
-      // EXTRAÇÃO MECÂNICA
-      extracaoMecanica: {
-        extracaoTipo,
-        extracaoRepetir,
-        extracaoRepetirQte,
-        extracaoPausa,
-        extracaoAux,
-        avancos: {
-          avancos1: { VEL: extAvanco1VEL, PRES: extAvanco1PRES, POS: extAvanco1POS },
-          avancos2: { VEL: extAvanco2VEL, PRES: extAvanco2PRES, POS: extAvanco2POS },
-        },
-        retornos: {
-          retorno1: { VEL: extRetorno1VEL, PRES: extRetorno1PRES, POS: extRetorno1POS },
-          retorno2: { VEL: extRetorno2VEL, PRES: extRetorno2PRES, POS: extRetorno2POS },
-        },
-        obsExtracaoMecanica,
-      },
-
-      // PNEUMÁTICO
-      pneumatico: {
-        ar1: { Tipo: extPneu1Tipo, Posicao: extPneu1POS, Atraso: extPneu1RET, Tempo: extPneu1TEMP },
-        ar2: { Tipo: extPneu2Tipo, Posicao: extPneu2POS, Atraso: extPneu2RET, Tempo: extPneu2TEMP },
-        ar3: { Tipo: extPneu3Tipo, Posicao: extPneu3POS, Atraso: extPneu3RET, Tempo: extPneu3TEMP },
-        ar4: { Tipo: extPneu4Tipo, Posicao: extPneu4POS, Atraso: extPneu4RET, Tempo: extPneu4TEMP },
-        ar5: { Tipo: extPneu5Tipo, Posicao: extPneu5POS, Atraso: extPneu5RET, Tempo: extPneu5TEMP },
-        ar6: { Tipo: extPneu6Tipo, Posicao: extPneu6POS, Atraso: extPneu6RET, Tempo: extPneu6TEMP },
-      },
-
-      // MACHOS - AVANÇOS
-      machosAvancos: {
-        macho1: { Modo: MachoAvanco1Modo, Cond: MachoAvanco1Cond, Curso: MachoAvanco1Curso, VEL: MachoAvanco1VEL, PRES: MachoAvanco1PRES, TEMP: MachoAvanco1TEMP },
-        macho2: { Modo: MachoAvanco2Modo, Cond: MachoAvanco2Cond, Curso: MachoAvanco2Curso, VEL: MachoAvanco2VEL, PRES: MachoAvanco2PRES, TEMP: MachoAvanco2TEMP },
-        macho3: { Modo: MachoAvanco3Modo, Cond: MachoAvanco3Cond, Curso: MachoAvanco3Curso, VEL: MachoAvanco3VEL, PRES: MachoAvanco3PRES, TEMP: MachoAvanco3TEMP },
-        macho4: { Modo: MachoAvanco4Modo, Cond: MachoAvanco4Cond, Curso: MachoAvanco4Curso, VEL: MachoAvanco4VEL, PRES: MachoAvanco4PRES, TEMP: MachoAvanco4TEMP },
-        macho5: { Modo: MachoAvanco5Modo, Cond: MachoAvanco5Cond, Curso: MachoAvanco5Curso, VEL: MachoAvanco5VEL, PRES: MachoAvanco5PRES, TEMP: MachoAvanco5TEMP },
-        macho6: { Modo: MachoAvanco6Modo, Cond: MachoAvanco6Cond, Curso: MachoAvanco6Curso, VEL: MachoAvanco6VEL, PRES: MachoAvanco6PRES, TEMP: MachoAvanco6TEMP },
-        macho7: { Modo: MachoAvanco7Modo, Cond: MachoAvanco7Cond, Curso: MachoAvanco7Curso, VEL: MachoAvanco7VEL, PRES: MachoAvanco7PRES, TEMP: MachoAvanco7TEMP },
-        macho8: { Modo: MachoAvanco8Modo, Cond: MachoAvanco8Cond, Curso: MachoAvanco8Curso, VEL: MachoAvanco8VEL, PRES: MachoAvanco8PRES, TEMP: MachoAvanco8TEMP },
-      },
-
-      // MACHOS - RETORNOS
-      machosRetornos: {
-        macho1: { Modo: MachoRetorno1Modo, Cond: MachoRetorno1Cond, Curso: MachoRetorno1Curso, VEL: MachoRetorno1VEL, PRES: MachoRetorno1PRES, TEMP: MachoRetorno1TEMP },
-        macho2: { Modo: MachoRetorno2Modo, Cond: MachoRetorno2Cond, Curso: MachoRetorno2Curso, VEL: MachoRetorno2VEL, PRES: MachoRetorno2PRES, TEMP: MachoRetorno2TEMP },
-        macho3: { Modo: MachoRetorno3Modo, Cond: MachoRetorno3Cond, Curso: MachoRetorno3Curso, VEL: MachoRetorno3VEL, PRES: MachoRetorno3PRES, TEMP: MachoRetorno3TEMP },
-        macho4: { Modo: MachoRetorno4Modo, Cond: MachoRetorno4Cond, Curso: MachoRetorno4Curso, VEL: MachoRetorno4VEL, PRES: MachoRetorno4PRES, TEMP: MachoRetorno4TEMP },
-        macho5: { Modo: MachoRetorno5Modo, Cond: MachoRetorno5Cond, Curso: MachoRetorno5Curso, VEL: MachoRetorno5VEL, PRES: MachoRetorno5PRES, TEMP: MachoRetorno5TEMP },
-        macho6: { Modo: MachoRetorno6Modo, Cond: MachoRetorno6Cond, Curso: MachoRetorno6Curso, VEL: MachoRetorno6VEL, PRES: MachoRetorno6PRES, TEMP: MachoRetorno6TEMP },
-        macho7: { Modo: MachoRetorno7Modo, Cond: MachoRetorno7Cond, Curso: MachoRetorno7Curso, VEL: MachoRetorno7VEL, PRES: MachoRetorno7PRES, TEMP: MachoRetorno7TEMP },
-        macho8: { Modo: MachoRetorno8Modo, Cond: MachoRetorno8Cond, Curso: MachoRetorno8Curso, VEL: MachoRetorno8VEL, PRES: MachoRetorno8PRES, TEMP: MachoRetorno8TEMP },
-      },
-
-      // OBSERVAÇÕES E ANOTAÇÕES
-      observacoes: {
-        obsMacho,
-        obsProcMontagem,
-        obsOptecnica,
-        obsQualidade,
+        obs_refrigeracao: obsRefrigeracao,
+        tipo_injecao: tipoInjecao,
+        injecao1_vel: injecao1VEL ? parseFloat(injecao1VEL) : null,
+        injecao1_pres: injecao1PRES ? parseFloat(injecao1PRES) : null,
+        injecao1_pos: injecao1POS ? parseFloat(injecao1POS) : null,
+        injecao2_vel: injecao2VEL ? parseFloat(injecao2VEL) : null,
+        injecao2_pres: injecao2PRES ? parseFloat(injecao2PRES) : null,
+        injecao2_pos: injecao2POS ? parseFloat(injecao2POS) : null,
+        injecao3_vel: injecao3VEL ? parseFloat(injecao3VEL) : null,
+        injecao3_pres: injecao3PRES ? parseFloat(injecao3PRES) : null,
+        injecao3_pos: injecao3POS ? parseFloat(injecao3POS) : null,
+        injecao4_vel: injecao4VEL ? parseFloat(injecao4VEL) : null,
+        injecao4_pres: injecao4PRES ? parseFloat(injecao4PRES) : null,
+        injecao4_pos: injecao4POS ? parseFloat(injecao4POS) : null,
+        injecao_pressao_max: InjecaoPressaoMax ? parseFloat(InjecaoPressaoMax) : null,
+        injecao_tempo_programado: InjecaoTempoProgramado ? parseFloat(InjecaoTempoProgramado) : null,
+        recalque_tipo: recalqueTipo,
+        recalque1_vel: recalque1VEL ? parseFloat(recalque1VEL) : null,
+        recalque1_pres: recalque1PRES ? parseFloat(recalque1PRES) : null,
+        recalque1_temp: recalque1TEMP ? parseFloat(recalque1TEMP) : null,
+        recalque2_vel: recalque2VEL ? parseFloat(recalque2VEL) : null,
+        recalque2_pres: recalque2PRES ? parseFloat(recalque2PRES) : null,
+        recalque2_temp: recalque2TEMP ? parseFloat(recalque2TEMP) : null,
+        recalque3_vel: recalque3VEL ? parseFloat(recalque3VEL) : null,
+        recalque3_pres: recalque3PRES ? parseFloat(recalque3PRES) : null,
+        recalque3_temp: recalque3TEMP ? parseFloat(recalque3TEMP) : null,
+        recalque4_vel: recalque4VEL ? parseFloat(recalque4VEL) : null,
+        recalque4_pres: recalque4PRES ? parseFloat(recalque4PRES) : null,
+        recalque4_temp: recalque4TEMP ? parseFloat(recalque4TEMP) : null,
+        obs_recalque: obsRecalque,
+        extracao_tipo: extracaoTipo,
+        extracao_repetir: extracaoRepetir === 'sim',
+        extracao_repetir_qte: extracaoRepetirQte ? parseInt(extracaoRepetirQte) : null,
+        obs_extracao_mecanica: obsExtracaoMecanica,
+        obs_macho: obsMacho,
+        obs_proc_montagem: obsProcMontagem,
+        obs_op_tecnica: obsOptecnica,
+        obs_qualidade: obsQualidade,
         instrucoes,
         consideracoes,
-      },
+        elaborado_por: ElaboraPor,
+        verificado_por: VerificadoPor,
+        aprovado_por: AprovadoPor,
+      }
 
-      // ATRASOS
-      atrasos: {
-        MachoAvancoAtraso,
-        MachoRetornoAtraso,
-      },
+      try {
+        let result
+        if (editingId) {
+          // Atualizar ficha existente
+          const { error } = await supabase
+            .from('tb_ftp')
+            .update(fichaSalva)
+            .eq('id', editingId)
+          
+          if (error) throw error
+          result = { ...fichaSalva, id: editingId }
+        } else {
+          // Criar nova ficha
+          const { data, error } = await supabase
+            .from('tb_ftp')
+            .insert([fichaSalva])
+            .select()
+          
+          if (error) throw error
+          result = data?.[0]
+        }
 
-      // RETORNOS E CONTROLES
-      controlesRetorno: {
-        retSaidaExtracao,
-        baixaPressao,
-        retFimAltaPressao,
-        retFimFechamento,
-        retExtrator,
-        retRecuoBico,
-        retAvancoBico,
-        retPurga,
-        aberturaLentaPorta,
-        portaAberta,
-      },
-
-      // Alarmes e configurações adicionais
-      alarmeReciclo: {
-        alarmeRetDosagem,
-        Reciclo,
-        descAnteDosagem,
-      },
-
-      // Configurações do friso
-      configFriso: {
-        ALPRFIABPRES,
-        sicExtraPres,
-        FecAuxPres,
-      },
-
-      // Timestamp
-      dataCriacao: new Date().toISOString(),
+        setFicha(result)
+        setMessage('✓ Ficha salva com sucesso!')
+        setTimeout(() => setMessage(''), 3000)
+        console.log('Ficha Salva:', result)
+      } catch (dbError) {
+        setMessage('✗ Erro ao salvar ficha: ' + dbError.message)
+        console.error('Erro:', dbError)
+      }
+    } catch (error) {
+      setMessage('✗ Erro na requisição: ' + error.message)
+      console.error('Erro:', error)
+    } finally {
+      setLoading(false)
     }
-    setFicha(fichaSalva)
-    console.log('Ficha Salva:', fichaSalva)
-    return fichaSalva
   }
+
+  // Função para recuperar dados de uma ficha específica
+  const carregarFicha = async (id, mode = 'edit') => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('tb_ftp')
+        .select()
+        .eq('id', id)
+
+      if (error) throw error
+
+      if (data && data.length > 0) {
+        const fichaData = data[0]
+        preencherFormulario(fichaData, mode)
+        setFicha(fichaData)
+        setFormMode(mode)
+        setEditingId(mode === 'edit' ? id : null)
+        setMessage('✓ Ficha carregada com sucesso!')
+        setTimeout(() => setMessage(''), 3000)
+      } else {
+        setMessage('✗ Ficha não encontrada')
+      }
+    } catch (error) {
+      setMessage('✗ Erro ao carregar ficha: ' + error.message)
+      console.error('Erro:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Função para preencher o formulário com dados recuperados
+  const preencherFormulario = (data, mode = 'edit') => {
+    // Mapear os campos da tabela tb_FTP para os estados React
+    settipo(data.tipo)
+    setversao(mode === 'duplicate' ? incrementVersao(data.versao) : data.versao)
+    setdata(data.data)
+    setmolde(data.molde || '')
+    setpapi(data.papi)
+    setcodmolde(data.codmolde)
+    setcavidades(data.cavidades || '')
+    setmaquina(data.maquina || '')
+    setprograma(data.programa)
+    setPilha(data.pilha || '')
+    setlastro(data.lastro || '')
+    setmeio(data.meio || '')
+    settotal(data.total || '')
+    setpesoIdeal(data.peso_ideal || '')
+    settolerancia(data.tolerancia || '')
+    setPH(data.ph || '')
+    setmateriaPrima(data.materia_prima)
+    setbico(data.bico || '')
+    setz1(data.z1 || '')
+    setz2(data.z2 || '')
+    setz3(data.z3 || '')
+    setz4(data.z4 || '')
+    setz5(data.z5 || '')
+    setz6(data.z6 || '')
+    setz7(data.z7 || '')
+    setz8(data.z8 || '')
+    setz9(data.z9 || '')
+    setz10(data.z10 || '')
+    setz11(data.z11 || '')
+    setz12(data.z12 || '')
+    setz13(data.z13 || '')
+    setsecador(data.secador)
+    setsecTemperatura(data.sec_temperatura || '')
+    setsecTempo(data.sec_tempo || '')
+    setc1(data.c1 || '')
+    setc2(data.c2 || '')
+    setc3(data.c3 || '')
+    setc4(data.c4 || '')
+    setc5(data.c5 || '')
+    setc6(data.c6 || '')
+    setc7(data.c7 || '')
+    setc8(data.c8 || '')
+    setc9(data.c9 || '')
+    setc10(data.c10 || '')
+    setc11(data.c11 || '')
+    setc12(data.c12 || '')
+    setc13(data.c13 || '')
+    setc14(data.c14 || '')
+    setc15(data.c15 || '')
+    setc16(data.c16 || '')
+    setc17(data.c17 || '')
+    setc18(data.c18 || '')
+    setc19(data.c19 || '')
+    setc20(data.c20 || '')
+    setc21(data.c21 || '')
+    setc22(data.c22 || '')
+    setc23(data.c23 || '')
+    setc24(data.c24 || '')
+    setc25(data.c25 || '')
+    setc26(data.c26 || '')
+    setc27(data.c27 || '')
+    setobsTemperaturas(data.obs_temperaturas)
+    setrefrigeracao(data.refrigeracao)
+    setobsRefrigeracao(data.obs_refrigeracao)
+    settAbertura(data.t_abertura || '')
+    settFechamento(data.t_fechamento || '')
+    settDosagem(data.t_dosagem || '')
+    settInjecao(data.t_injecao || '')
+    settRecalque(data.t_recalque || '')
+    settResfriamento(data.t_resfriamento || '')
+    settExtracao(data.t_extracao || '')
+    settCiclo(data.t_ciclo || '')
+    settipoInjecao(data.tipo_injecao)
+    setinjecao1VEL(data.injecao1_vel || '')
+    setinjecao1PRES(data.injecao1_pres || '')
+    setinjecao1POS(data.injecao1_pos || '')
+    setinjecao2VEL(data.injecao2_vel || '')
+    setinjecao2PRES(data.injecao2_pres || '')
+    setinjecao2POS(data.injecao2_pos || '')
+    setinjecao3VEL(data.injecao3_vel || '')
+    setinjecao3PRES(data.injecao3_pres || '')
+    setinjecao3POS(data.injecao3_pos || '')
+    setinjecao4VEL(data.injecao4_vel || '')
+    setinjecao4PRES(data.injecao4_pres || '')
+    setinjecao4POS(data.injecao4_pos || '')
+    setInjecaoPressaoMax(data.injecao_pressao_max || '')
+    setInjecaoTempoProgramado(data.injecao_tempo_programado || '')
+    setrecalqueTipo(data.recalque_tipo)
+    setrecalque1VEL(data.recalque1_vel || '')
+    setrecalque1PRES(data.recalque1_pres || '')
+    setrecalque1TEMP(data.recalque1_temp || '')
+    setrecalque2VEL(data.recalque2_vel || '')
+    setrecalque2PRES(data.recalque2_pres || '')
+    setrecalque2TEMP(data.recalque2_temp || '')
+    setrecalque3VEL(data.recalque3_vel || '')
+    setrecalque3PRES(data.recalque3_pres || '')
+    setrecalque3TEMP(data.recalque3_temp || '')
+    setrecalque4VEL(data.recalque4_vel || '')
+    setrecalque4PRES(data.recalque4_pres || '')
+    setrecalque4TEMP(data.recalque4_temp || '')
+    setobsRecalque(data.obs_recalque)
+    setextracaoTipo(data.extracao_tipo)
+    setextracaoRepetir(data.extracao_repetir ? 'sim' : 'nao')
+    setextracaoRepetirQte(data.extracao_repetir_qte || '')
+    setobsExtracaoMecanica(data.obs_extracao_mecanica)
+    setobsMacho(data.obs_macho)
+    setobsProcMontagem(data.obs_proc_montagem)
+    setobsOptecnica(data.obs_op_tecnica)
+    setobsQualidade(data.obs_qualidade)
+    setinstrucoes(data.instrucoes)
+    setconsideracoes(data.consideracoes)
+    setElaboraPor(data.elaborado_por)
+    setVerificadoPor(data.verificado_por)
+    setAprovadoPor(data.aprovado_por)
+  }
+
+  useEffect(() => {
+    const id = searchParams.get('id')
+    const mode = searchParams.get('mode')
+
+    if (id) {
+      carregarFicha(id, mode === 'duplicate' ? 'duplicate' : 'edit')
+    } else {
+      setFormMode('new')
+      setEditingId(null)
+    }
+  }, [searchParams])
 
   return (
     <>
 
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
 <div style={{background:'#555858', color:'white'}}>
-        <h3>Ficha Técnica</h3>
-        <img style={{ height: '200px', border:'4px solid gray', padding:' 10px 10px 10px 10px', margin:'10px 10px 30px 10px'}} src={moldes[1].foto} />
+        <h3>{formMode === 'edit' ? 'Editar Ficha Técnica' : formMode === 'duplicate' ? 'Duplicar Ficha Técnica' : 'Nova Ficha Técnica'}</h3>
+        <img id='imagem_cabecalho' style={{ height: '200px', border:'4px solid gray', padding:' 10px 10px 10px 10px', margin:'10px 10px 30px 10px'}} src={imagemCabecalho || moldes[1].foto} />
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '6px' }}>Imagem de Cabeçalho</label>
+          <input type='file' accept='image/*' onChange={handleImagemCabecalhoChange} />
+        </div>
         
         <div className='quadroMaior'>
           <div className='coluna'>
@@ -606,23 +815,23 @@ const [maquinas,setMaquinas] = useState([
               {/* ENTRADA */}
 
               <label>Cod:</label>
-              <select type="text" style={{ width: '200px' }}>
+              <select value={molde} onChange={(e) => setmolde(e.target.value)} style={{ width: '200px' }}>
                 {moldes.map(m => (
-                  <option key={m.id} value={m.id}>{m.molde}</option>
-                ))
-                }</select>
-                <label>Maquina</label>
-              <select type="text" style={{ width: '200px' }}>
+                  <option key={m.id} value={m.molde}>{m.molde}</option>
+                ))}
+              </select>
+              <label>Máquina</label>
+              <select value={maquina} onChange={(e) => setmaquina(e.target.value)} style={{ width: '200px' }}>
                 {maquinas.map(m => (
-                  <option key={m.id} value={m.id}>{m.maquina}</option>
-                ))
-                }</select>
+                  <option key={m.id} value={m.maquina}>{m.maquina}</option>
+                ))}
+              </select>
               <div className='pulaLinha'></div>
-                    <label>Produto:</label>
-                      <input type="text" style={{ width: '300px' }} />
-                    <div style={{ padding: '20px' }}>
-                  </div>
+              <label>Produto:</label>
+              <input type="text" style={{ width: '300px' }} value={papi} onChange={(e) => setpapi(e.target.value)} />
+              <div style={{ padding: '20px' }}>
               </div>
+            </div>
             <div className='coluna'>
               <div className='campos-container'>
 
@@ -630,18 +839,18 @@ const [maquinas,setMaquinas] = useState([
                 <div className="field-p"><label>Ciclo</label><input value={tCiclo} onChange={(e) => settCiclo(e.target.value)} type='text' /></div>
                 <div className="field-p"><label>PH</label><input value={PH} onChange={(e) => setPH(e.target.value)} type='text' /></div>
                 <div className="field-p"><label>Peso</label><input value={pesoIdeal} onChange={(e) => setpesoIdeal(e.target.value)} type='text' /></div>
-                <div className="field-p"><label>Padrão</label><input value={""} type='text' /></div>
-                <div className="field-p"><label>Embalagem</label><input value={""} type='text' /></div>
-                <div className="field-p"><label>T Dos</label><input value={tDosagem} type='text' /></div>
-                <div className="field-p"><label>T Inj</label><input value={tInjecao} type='text' /></div>
-                <div className="field-p"><label>T Ext</label><input value={tExtracao} type='text' /></div>
-                <div className="field-p"><label>T Abe</label><input value={tAbertura} type='text' /></div>
-                <div className="field-p"><label>T Fech</label><input value={tFechamento} type='text' /></div>
+                <div className="field-p"><label>Padrão</label><input type='text' /></div>
+                <div className="field-p"><label>Embalagem</label><input type='text' /></div>
+                <div className="field-p"><label>T Dos</label><input value={tDosagem} onChange={(e) => settDosagem(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Inj</label><input value={tInjecao} onChange={(e) => settInjecao(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Ext</label><input value={tExtracao} onChange={(e) => settExtracao(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Abe</label><input value={tAbertura} onChange={(e) => settAbertura(e.target.value)} type='text' /></div>
+                <div className="field-p"><label>T Fech</label><input value={tFechamento} onChange={(e) => settFechamento(e.target.value)} type='text' /></div>
                 </div><br/>
                 <div style={{textAlign:'right'}}>
-                <div><label>Elaborado por:</label><input value={ElaboraPor} type='text' /></div>
-                <div><label>Aprovado por:</label><input value={AprovadoPor} type='text' /></div>
-                <div><label>Aprovado em:</label><input value={data} type='text' /></div>
+                <div><label>Elaborado por:</label><input value={ElaboraPor} onChange={(e) => setElaboraPor(e.target.value)} type='text' /></div>
+                <div><label>Aprovado por:</label><input value={AprovadoPor} onChange={(e) => setAprovadoPor(e.target.value)} type='text' /></div>
+                <div><label>Aprovado em:</label><input value={data} onChange={(e) => setdata(e.target.value)} type='text' /></div>
               </div>
             </div>
           </div>
@@ -1296,7 +1505,7 @@ const [maquinas,setMaquinas] = useState([
         <Section title="OPINIÃO TÉCNICA">
           <div className='field'>
             <label>Informações</label>
-            <textarea className="txt-area" value={obsOptecnica} onChange={(e) => obsOptecnicaset(e.target.value)} placeholder="Digite aqui..."></textarea>
+            <textarea className="txt-area" value={obsOptecnica} onChange={(e) => setobsOptecnica(e.target.value)} placeholder="Digite aqui..."></textarea>
           </div>
 
         </Section>
@@ -1310,30 +1519,66 @@ const [maquinas,setMaquinas] = useState([
         </Section>
 
         <Section title="IMAGENS">
-          <div className='quadroMaior'>
-            <div className='coluna'>
-              <div className='campos-container'>
-                <div>
-                  <label>Produto</label>
-                  <div className='card'>
+          <div style={{ marginBottom: '15px' }}>
+            <button type='button' onClick={handleAddImagem} style={{ padding: '10px 16px', cursor: 'pointer', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#f0f0f0' }}>
+              Adicionar imagem
+            </button>
+          </div>
 
-                    <img style={{ height: '200px' }} src={moldes[1].foto} />
+          {imagens.length === 0 && (
+            <div style={{ marginBottom: '15px' }}>
+              Nenhuma imagem adicionada. Clique em "Adicionar imagem" para incluir fotos.
+            </div>
+          )}
+
+          {imagens.map((item, index) => (
+            <div key={item.id} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <strong>Imagem {index + 1}</strong>
+                <button type='button' onClick={() => handleRemoveImagem(item.id)} style={{ padding: '6px 10px', cursor: 'pointer' }}>
+                  Remover
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                <div style={{ minWidth: '200px' }}>
+                  <label>Preview</label>
+                  <div className='card' style={{ marginTop: '8px', minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                    <img style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }} src={item.imagem || moldes[1].foto} />
+                  </div>
+                  <div style={{ marginTop: '10px' }}>
+                    <input type='file' accept='image/*' onChange={(e) => handleImagemChange(item.id, e)} />
                   </div>
                 </div>
-                <div>
-                  <label>Embalagem</label>
-                  <div className='card'>
-
-                    <img style={{ height: '200px' }} src={moldes[1].foto} />
+                <div style={{ flex: '1 1 280px' }}>
+                  <div style={{ marginBottom: '10px' }}>
+                    <label>Título</label>
+                    <input type='text' value={item.titulo} onChange={(e) => handleImagemTituloChange(item.id, e.target.value)} style={{ width: '100%' }} />
+                  </div>
+                  <div>
+                    <label>Observação</label>
+                    <textarea className='txt-area' value={item.observacao} onChange={(e) => handleImagemObservacaoChange(item.id, e.target.value)} placeholder='Digite aqui...' />
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          ))}
         </Section>
 
-        <button onClick={handleSaveFicha} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
-          Salvar Ficha
+        {message && (
+          <div style={{
+            marginTop: '20px',
+            padding: '10px 15px',
+            backgroundColor: message.includes('✓') ? '#d4edda' : '#f8d7da',
+            color: message.includes('✓') ? '#155724' : '#721c24',
+            border: `1px solid ${message.includes('✓') ? '#c3e6cb' : '#f5c6cb'}`,
+            borderRadius: '4px'
+          }}>
+            {message}
+          </div>
+        )}
+
+        <button onClick={handleSaveFicha} disabled={loading} style={{ marginTop: '20px', padding: '10px 20px', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1 }}>
+          {loading ? 'Salvando...' : 'Salvar Ficha'}
         </button>
 
         <button style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>

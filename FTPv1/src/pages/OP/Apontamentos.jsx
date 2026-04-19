@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
+import supabase from '../../conexao/conexao'
+
 export default function Apontamento() {
     const [Produzido, setProduzido] = useState('');
     const [quantidadeMPApontada, setQuantidadeMPApontada] = useState('');
@@ -12,21 +14,23 @@ export default function Apontamento() {
 
     const location = useLocation();
     const { op } = useParams();
-    const URL = 'https://69cebbb833a09f831b7debab.mockapi.io/';
 
-    // Buscar dados completos da OP do mockapi
     useEffect(() => {
         const fetchOPData = async () => {
             try {
-                const response = await fetch(`${URL}OPs/${op}`);
-                if (response.ok) {
-                    const data = await response.json();
+                const { data, error } = await supabase
+                    .from('OPs')
+                    .select('*')
+                    .eq('id', op)
+                    .single();
+                if (error) {
+                    throw error;
+                }
+                if (data) {
                     setOpCompleta(data);
-                } else {
-                    console.error('Erro ao buscar OP:', response.status);
                 }
             } catch (error) {
-                console.error('Erro na requisição:', error);
+                console.log(error);
             } finally {
                 setLoading(false);
             }
@@ -57,24 +61,25 @@ export default function Apontamento() {
             const quantidadeAtual = parseFloat(Produzido);
             const novoTotalProduzido = (opData.Produzido || 0) + quantidadeAtual;
 
-            // Atualizar a OP no mockapi
-            const response = await fetch(`${URL}OPs/${opData.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    ...opData,
+            // Atualizar a OP no Supabase
+            const { data, error } = await supabase
+                .from('OPs')
+                .update({
                     Produzido: novoTotalProduzido,
                     MPApontada: (opData.MPApontada || 0) + parseFloat(quantidadeMPApontada),
                     PerdaKg: (opData.PerdaKg || 0) + (parseFloat(PerdaKg) || 0),
                     PerdaPercentual: (opData.PerdaPercentual || 0) + (parseFloat(perdaPercentual) || 0)
                 })
-            });
+                .eq('id', opData.id)
+                .select()
+                .single();
 
-            if (response.ok) {
-                const updatedOP = await response.json();
-                setOpCompleta(updatedOP);
+            if (error) {
+                throw error;
+            }
+
+            if (data) {
+                setOpCompleta(data);
 
                 // Adicionar ao histórico local
                 const novoApontamento = {
@@ -94,8 +99,6 @@ export default function Apontamento() {
                 setPerdaPercentual('');
 
                 alert('Apontamento registrado com sucesso!');
-            } else {
-                throw new Error('Erro ao atualizar OP');
             }
         } catch (error) {
             console.error('Erro ao registrar apontamento:', error);
