@@ -5,6 +5,8 @@ import supabase from '../../conexao/conexao'
 
 export default function FTP() {
 
+  
+
   const [moldes, setMoldes] = useState([
     { id: 1, molde: 'Cadeira Monobloco', foto: 'https://images.tcdn.com.br/img/img_prod/1286580/kit_4_cadeira_poltrona_alta_black_e_1_mesa_plastica_monobloco_preta_70x70cm_105_2_5c54f4819aae24902d782253178cae78.jpg', bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },
     { id: 2, molde: 'Mesa Monobloco', foto: "https://cdn.awsli.com.br/2500x2500/1131/1131299/produto/321286504/catty-rosa-kvtbz9vlph.webp", bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },
