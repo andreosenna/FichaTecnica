@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import supabase from "../../conexao/conexao";
 
 export default function ListaFTP() {
-  const MOCKAPI_URL = "https://69c55f5e8a5b6e2dec2c4e9b.mockapi.io/gfila/api/fichaTecnica"
+  
   const [listaftps, setListaFtps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,10 +16,13 @@ export default function ListaFTP() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(MOCKAPI_URL);
-      
-      if (response.ok) {
-        const data = await response.json();
+      const { data, error } = await supabase
+        .from('tb_ftp')
+        .select()
+
+      if (error) throw error
+
+      if (data) {
         // Mapear os dados para mostrar apenas molde, versão, dataCriação e máquina
         const fichasFormatadas = data.map(ficha => ({
           id: ficha.id,
