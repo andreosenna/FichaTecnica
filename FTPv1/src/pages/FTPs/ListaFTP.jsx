@@ -74,7 +74,7 @@ export default function ListaFTP() {
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}>
           <thead>
-            <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
+            <tr style={{ backgroundColor: '#1f1f1f', borderBottom: '2px solid #ddd' }}>
               <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold' }}>ID</th>
               <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold' }}>Molde</th>
               <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold' }}>Versão</th>

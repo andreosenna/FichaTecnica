@@ -15,18 +15,28 @@ export default function FTP() {
     { id: 5, molde: 'Lixeira 90L', foto: "", bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },
     { id: 6, molde: 'Pote 1000ML', foto: "", bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },
   ])
-const [maquinas,setMaquinas] = useState([
-  {id:1,maquina:'J258-1'},
-  {id:2,maquina:'J320-1'},
-  {id:3,maquina:'J320-2'},
-  {id:4,maquina:'J480-1'},
-  {id:5,maquina:'J480-2'},
-  {id:6,maquina:'T630-1'},
-  {id:7,maquina:'j650-1'},
-  {id:8,maquina:'j650-2'},
-  {id:9,maquina:'j650-3'},
-  {id:10,maquina:'j800-1'},
-])
+const [maquinas,setMaquinas] = useState([])
+
+
+const fetchMaquinas = async ()=>{
+  try{
+  const {data , error} = await supabase.from('tb_maquinas').select('*')
+  if(error){
+    throw error
+  }
+  if(data){ 
+    setMaquinas(data)
+  }
+  }catch(e){
+    console.error('Erro ao buscar máquinas:', e)
+}
+}
+useEffect(()=> {
+  fetchMaquinas()
+
+})
+
+
 
   const [tipo, settipo] = useState()
   const [versao, setversao] = useState()
@@ -43,7 +53,7 @@ const [maquinas,setMaquinas] = useState([
   const [total, settotal] = useState()
   const [pesoIdeal, setpesoIdeal] = useState()
   const [tolerancia, settolerancia] = useState()
-  const [pressaoInjecaoReal, setpressaoInjecaoReal] = useState()
+ // const [pressaoInjecaoReal, setpressaoInjecaoReal] = useState()
   const [tAbertura, settAbertura] = useState()
   const [tFechamento, settFechamento] = useState()
   const [tDosagem, settDosagem] = useState()
@@ -52,9 +62,9 @@ const [maquinas,setMaquinas] = useState([
   const [tResfriamento, settResfriamento] = useState()
   const [tExtracao, settExtracao] = useState()
   const [tCiclo, settCiclo] = useState()
-  const [tRebarbagem, settRebarbagem] = useState()
-  const [tExtracaoAux, settExtracaoAux] = useState()
-  const [tMontagem, settMontagem] = useState()
+ // const [tRebarbagem, settRebarbagem] = useState()
+ // const [tExtracaoAux, settExtracaoAux] = useState()
+ // const [tMontagem, settMontagem] = useState()
   const [PH, setPH] = useState()
   const [materiaPrima, setmateriaPrima] = useState()
   const [bico, setbico] = useState()
@@ -74,7 +84,7 @@ const [maquinas,setMaquinas] = useState([
   const [secador, setsecador] = useState()
   const [secTemperatura, setsecTemperatura] = useState()
   const [secTempo, setsecTempo] = useState()
-  const [CamaraQuente, setCamaraQuente] = useState()
+//  const [CamaraQuente, setCamaraQuente] = useState()
   const [c1, setc1] = useState()
   const [c2, setc2] = useState()
   const [c3, setc3] = useState()
@@ -478,10 +488,10 @@ const [maquinas,setMaquinas] = useState([
   const handleSaveFicha = async () => {
     try {
       setLoading(true)
-      const isEditMode = formMode === 'edit' && editingId
       
       // Mapear campos do formulário para os campos da tabela tb_FTP
       const fichaSalva = {
+        imagem_cabecalho: imagemCabecalho || null,
         tipo,
         versao,
         data,
@@ -670,6 +680,7 @@ const [maquinas,setMaquinas] = useState([
   const preencherFormulario = (data, mode = 'edit') => {
     // Mapear os campos da tabela tb_FTP para os estados React
     settipo(data.tipo)
+    setImagemCabecalho(data.imagem_cabecalho || '')
     setversao(mode === 'duplicate' ? incrementVersao(data.versao) : data.versao)
     setdata(data.data)
     setmolde(data.molde || '')
@@ -806,7 +817,7 @@ const [maquinas,setMaquinas] = useState([
         <img id='imagem_cabecalho' style={{ height: '200px', border:'4px solid gray', padding:' 10px 10px 10px 10px', margin:'10px 10px 30px 10px'}} src={imagemCabecalho || moldes[1].foto} />
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', marginBottom: '6px' }}>Imagem de Cabeçalho</label>
-          <input type='file' accept='image/*' onChange={handleImagemCabecalhoChange} />
+          <input id='imagem_cabecalho_input' type='file' accept='image/*' onChange={handleImagemCabecalhoChange} />
         </div>
         
         <div className='quadroMaior'>
@@ -823,7 +834,7 @@ const [maquinas,setMaquinas] = useState([
               <label>Máquina</label>
               <select value={maquina} onChange={(e) => setmaquina(e.target.value)} style={{ width: '200px' }}>
                 {maquinas.map(m => (
-                  <option key={m.id} value={m.maquina}>{m.maquina}</option>
+                  <option style={{ color: 'black' }} key={m.id} value={m.codMaquina}>{m.descMaquina}</option>
                 ))}
               </select>
               <div className='pulaLinha'></div>
