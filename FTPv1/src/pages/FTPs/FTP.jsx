@@ -6,15 +6,26 @@ import supabase from '../../conexao/conexao'
 export default function FTP() {
 
   
-
-  const [moldes, setMoldes] = useState([
+const [listaMoldes,setListaMoldes] = useState([])
+  /*const [moldes, setMoldes] = useState([
     { id: 1, molde: 'Cadeira Monobloco', foto: 'https://images.tcdn.com.br/img/img_prod/1286580/kit_4_cadeira_poltrona_alta_black_e_1_mesa_plastica_monobloco_preta_70x70cm_105_2_5c54f4819aae24902d782253178cae78.jpg', bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },
     { id: 2, molde: 'Mesa Monobloco', foto: "https://cdn.awsli.com.br/2500x2500/1131/1131299/produto/321286504/catty-rosa-kvtbz9vlph.webp", bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },
     { id: 3, molde: 'Estante Modular', foto: "", bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },
     { id: 4, molde: 'Balde 8L', foto: "", bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },
     { id: 5, molde: 'Lixeira 90L', foto: "", bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },
     { id: 6, molde: 'Pote 1000ML', foto: "", bico: 200, zona1: 240, zona2: 230, zona3: 220, cq1: 200, cq2: 200 },
-  ])
+  ])*/
+
+const fetchMoldes = async ()=>{
+const {data,error} = await supabase.from('tb_moldes').select('*')
+if(error)throw error
+if(data) setListaMoldes(data)
+
+}
+useEffect (()=>{
+  fetchMoldes()
+})
+
 const [maquinas,setMaquinas] = useState([])
 
 
@@ -41,7 +52,7 @@ useEffect(()=> {
   const [tipo, settipo] = useState()
   const [versao, setversao] = useState()
   const [data, setdata] = useState()
-  const [molde, setmolde] = useState(moldes[0]?.molde || '')
+  const [molde, setmolde] = useState()
   const [papi, setpapi] = useState()
   const [codmolde, setcodmolde] = useState()
   const [cavidades, setcavidades] = useState()
@@ -814,7 +825,7 @@ useEffect(()=> {
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
 <div style={{background:'#555858', color:'white'}}>
         <h3>{formMode === 'edit' ? 'Editar Ficha Técnica' : formMode === 'duplicate' ? 'Duplicar Ficha Técnica' : 'Nova Ficha Técnica'}</h3>
-        <img id='imagem_cabecalho' style={{ height: '200px', border:'4px solid gray', padding:' 10px 10px 10px 10px', margin:'10px 10px 30px 10px'}} src={imagemCabecalho || moldes[1].foto} />
+        <img id='imagem_cabecalho' style={{ height: '200px', border:'4px solid gray', padding:' 10px 10px 10px 10px', margin:'10px 10px 30px 10px'}} src={imagemCabecalho} />
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', marginBottom: '6px' }}>Imagem de Cabeçalho</label>
           <input id='imagem_cabecalho_input' type='file' accept='image/*' onChange={handleImagemCabecalhoChange} />
@@ -826,11 +837,13 @@ useEffect(()=> {
               {/* ENTRADA */}
 
               <label>Cod:</label>
-              <select value={molde} onChange={(e) => setmolde(e.target.value)} style={{ width: '200px' }}>
-                {moldes.map(m => (
-                  <option key={m.id} value={m.molde}>{m.molde}</option>
+              <input type='text' value={molde} list="listMoldes" onChange={(e) => setmolde(e.target.value)} style={{ width: '200px' }}/>
+                <datalist id='listMoldes'>
+                  {listaMoldes.map(m => (
+                  <option key={m.id} value={m.codMoldeExterno}>{m.descMolde}</option>
                 ))}
-              </select>
+                </datalist>
+              
               <label>Máquina</label>
               <select value={maquina} onChange={(e) => setmaquina(e.target.value)} style={{ width: '200px' }}>
                 {maquinas.map(m => (
@@ -839,7 +852,7 @@ useEffect(()=> {
               </select>
               <div className='pulaLinha'></div>
               <label>Produto:</label>
-              <input type="text" style={{ width: '300px' }} value={papi} onChange={(e) => setpapi(e.target.value)} />
+              <input type="text" style={{ width: '300px' }}   />
               <div style={{ padding: '20px' }}>
               </div>
             </div>
