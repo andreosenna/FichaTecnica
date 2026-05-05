@@ -1,242 +1,183 @@
+import React, {useEffect, useState} from 'react'
 
-import React, { useEffect, useState } from 'react';
-import supabase from '../../conexao/conexao';
+URL="https://69c55f5e8a5b6e2dec2c4e9b.mockapi.io/gfila/api/upLoad"
 
-export default function OrdemServico() {
-  const [listaOPs, setListaOPs] = useState([
-    { os: 'OS001', cliente: 'Empresa X', recursoTipo: 'molde', recursoNome: 'Molde A', abertura: '01/01/2024', previsao: '05/01/2024', status: 'Aberta' },
-    { os: 'OS002', cliente: 'Empresa Y', recursoTipo: 'maquina', recursoNome: 'Máquina B', abertura: '05/01/2024', previsao: '10/01/2024', status: 'Em Andamento' },
-    { os: 'OS003', cliente: 'Empresa Z', recursoTipo: 'molde', recursoNome: 'Molde C', abertura: '10/01/2024', previsao: '15/01/2024', status: 'Fechada' },
-  ]);
-  const [tipoRecurso, setTipoRecurso] = useState('molde');
-  const [recursoId, setRecursoId] = useState('');
-  const [recursos, setRecursos] = useState([]);
-  const [cliente, setCliente] = useState('');
-  const [dataAbertura, setDataAbertura] = useState('');
-  const [previsao, setPrevisao] = useState('');
-  const [status, setStatus] = useState('Aberta');
-  const [mostrarForm, setMostrarForm] = useState(false);
-  const [osAberta, setOsAberta] = useState(null);
+export default function GDOC(){
 
-  useEffect(() => {
-    carregarRecursos();
-  }, []);
 
-  useEffect(() => {
-    const porTipo = recursos.filter((item) => item.tipo === tipoRecurso);
-    if (porTipo.length > 0) {
-      setRecursoId(String(porTipo[0].id));
-    } else {
-      setRecursoId('');
-    }
-  }, [tipoRecurso, recursos]);
+const[codDoc,setCodDoc] = useState("")
+const[descDoc,setDescDoc] = useState("")
+const[tipo,setTipo] = useState("")
+const[emissor,setEmissor] = useState("")
+const[data,setData] = useState(new Date().toLocaleDateString('pt-BR'))
+const[status,setStatus] = useState("")
+const[verDoc,setVerDoc] = useState("")
+const[obsDoc,setObsDoc] = useState("")
+const [file,setFile] = useState(null)
 
-  const carregarRecursos = async () => {
-    try {
-      const { data: moldes, error: moldesError } = await supabase.from('tb_moldes').select('*');
-      const { data: maquinas, error: maquinasError } = await supabase.from('tb_maquinas').select('*');
+const handleUparArquivo = (arquivo)=>{
+  const arquivoUpado = arquivo.target.files[0]
+  if(arquivoUpado && arquivoUpado.type === "application/pdf"){
+     setFile(arquivoUpado);
+  }else 
+  {return alert("arquivo invalido")}
+}
 
-      if (moldesError) throw moldesError;
-      if (maquinasError) throw maquinasError;
+const handlEnviarBanco = async () =>{
+  //formData aceita apenas objetos 
+  const formData = new FormData()
+   const payload = {
+    codDoc,
+    descDoc,
+    tipo,
+    emissor,
+    data,
+    status,
+    verDoc,
+    obsDoc,
+    file: file ? file.name : null // MockAPI não salva arquivo real
+  }
+      const response = await fetch(URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    })
 
-      const moldesFormatados = (moldes || []).map((item) => ({
-        id: item.id,
-        tipo: 'molde',
-        nome: item.descMolde || 'Molde sem descrição',
-      }));
-      const maquinasFormatadas = (maquinas || []).map((item) => ({
-        id: item.id,
-        tipo: 'maquina',
-        nome: item.descMaquina || 'Máquina sem descrição',
-      }));
+    const dataResp = await response.json()
+    baixarBD()
+}
+const [listaDocumentos, setListaDocumentos] = useState([])
 
-      setRecursos([...moldesFormatados, ...maquinasFormatadas]);
-    } catch (error) {
-      console.error('Erro ao carregar recursos:', error);
-    }
-  };
+const baixarBD = async ()=>{
+  const response = await fetch(URL)
+  const data = await response.json()
+  setListaDocumentos(data)
+}
 
-  const recursosFiltrados = recursos.filter((item) => item.tipo === tipoRecurso);
-  const recursoSelecionado = recursosFiltrados.find((item) => String(item.id) === recursoId);
 
-  const mostrarFormulario = (value) => {
-    setMostrarForm(value);
-  };
+useEffect(()=>{
+  baixarBD()
+    //setListaDocumentos(exemplo)
+},[])
 
-  const handleCriarOS = (e) => {
-    e.preventDefault();
-    if (!cliente || !dataAbertura || !previsao || !recursoSelecionado) {
-      alert('Preencha os campos obrigatórios e selecione um recurso.');
-      return;
-    }
-
-    const novaOS = {
-      os: `OS${String(listaOPs.length + 1).padStart(3, '0')}`,
-      cliente,
-      recursoTipo: tipoRecurso,
-      recursoNome: recursoSelecionado.nome,
-      abertura: new Date(dataAbertura).toLocaleDateString('pt-BR'),
-      previsao: new Date(previsao).toLocaleDateString('pt-BR'),
-      status,
-    };
-
-    setListaOPs((prev) => [...prev, novaOS]);
-    setCliente('');
-    setDataAbertura('');
-    setPrevisao('');
-    setStatus('Aberta');
-    setMostrarForm(false);
-  };
-
-  const handleExcluir = (index) => {
-    if (!window.confirm('Deseja excluir esta OS?')) return;
-    setListaOPs((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleAbrirOS = (op) => {
-    setOsAberta(op);
-  };
-
-  return (
-    <>
-      <h1>Ordem de Serviço</h1>
-
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '24px' }}>
-        <thead>
+return(
+  <>
+   
+    
+      
+    <h1>GDOC - Gestão de Documentos</h1>
+    <h3>Lista de documentos</h3>
+    <table className="tabela">
+        <thead >
           <tr>
-            <th style={{ padding: '8px', borderBottom: '1px solid #ccc' }}>OS</th>
-            <th style={{ padding: '8px', borderBottom: '1px solid #ccc' }}>Cliente</th>
-            <th style={{ padding: '8px', borderBottom: '1px solid #ccc' }}>Recurso</th>
-            <th style={{ padding: '8px', borderBottom: '1px solid #ccc' }}>Abertura</th>
-            <th style={{ padding: '8px', borderBottom: '1px solid #ccc' }}>Previsão</th>
-            <th style={{ padding: '8px', borderBottom: '1px solid #ccc' }}>Status</th>
-            <th style={{ padding: '8px', borderBottom: '1px solid #ccc' }}>Ações</th>
-          </tr>
+            <th>Codigo</th>
+            <th>Descrição</th>
+            <th>Tipo</th>
+            <th>Emissor</th>
+            <th>Data</th>
+            <th>Status</th>
+            <th>Versao</th>
+            <th>Observações</th>
+            <th>Ações</th>
+            </tr>
         </thead>
         <tbody>
-          {listaOPs.map((op, index) => (
-            <tr key={`${op.os}-${index}`}>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{op.os}</td>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{op.cliente}</td>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
-                {`${op.recursoTipo === 'molde' ? 'Molde' : 'Máquina'}: ${op.recursoNome}`}
-              </td>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{op.abertura}</td>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{op.previsao}</td>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{op.status}</td>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
-                <button onClick={() => handleAbrirOS(op)} style={{ marginRight: '8px' }}>
-                  Abrir
-                </button>
-                <button onClick={() => handleExcluir(index)} style={{ backgroundColor: '#c00', color: '#fff' }}>
-                  Excluir
-                </button>
-              </td>
-            </tr>
-          ))}
+            {listaDocumentos.map((docs) =>(
+                <tr key={docs.id}>
+                    <td>{docs.codDoc}</td>
+                    <td>{docs.descDoc}</td>
+                    <td>{docs.tipo}</td>
+                    <td>{docs.emissor}</td>
+                    <td>{docs.data}</td>
+                    <td>{docs.status}</td>
+                    <td>{docs.verDoc}</td>
+                    <td>{docs.obsDoc}</td>
+                    <td><button className="button">Enviar</button></td>
+
+                </tr>
+            ))
+            }
         </tbody>
-      </table>
+    </table>
 
-      <button onClick={() => mostrarFormulario(true)} style={{ marginRight: '12px' }}>
-        Nova OS
-      </button>
-      <button onClick={() => mostrarFormulario(false)}>Fechar</button>
+    <br/>
+    <div>
+      
+      <h3>Insira novos documentos</h3>
+      <label>Cod</label><input type="text" value={codDoc} placeholder="001" onChange={e=>setCodDoc(e.target.value)}/><br/>
+      <label>Descrição do Documento</label><input type="text" placeholder="Teste" value={descDoc} onChange={e=>setDescDoc(e.target.value)}/><br/>
+      <label>Tipo</label><input type="text" value={tipo}  placeholder="doc" onChange={e=>setTipo(e.target.value)}/><br/>
+      <label>Emissor</label><input type="text" value={emissor}  placeholder="teste" onChange={e=>setEmissor(e.target.value)}/><br/>
+      <label>Data</label><input type="text" value={data} placeholder={new Date().toLocaleDateString()} onChange={e=>setData(e.target.value)}/><br/>
+      <label>Status</label><input type="text" value={status} placeholder="ativo" onChange={e=>setStatus(e.target.value)}/><br/>
+      <label>Versao</label><input type="text" value={verDoc} placeholder="00" onChange={e=>setVerDoc(e.target.value)}/><br/>
+      <label>observações do Documento</label><input type="text" placeholder="na" value={obsDoc} onChange={e=>setObsDoc(e.target.value)}/><br/>
+      
+    <input type='file' accept='.pdf' onChange={handleUparArquivo}/>
+    <br/>
+    <button  className="button" onClick={handlEnviarBanco}>Salvar</button>
 
-      {mostrarForm && (
-        <form onSubmit={handleCriarOS} style={{ marginTop: '24px', display: 'grid', gap: '12px' }}>
-          <label>
-            Tipo de Recurso:
-            <select value={tipoRecurso} onChange={(e) => setTipoRecurso(e.target.value)} style={{ marginLeft: '8px' }}>
-              <option value="molde">Molde</option>
-              <option value="maquina">Máquina</option>
-            </select>
-          </label>
+    </div>
+     <style>
+        {`
+          .container {
+            font-family: Arial;
+            padding: 20px;
+          }
 
-          <label>
-            Recurso:
-            <select
-              value={recursoId}
-              onChange={(e) => setRecursoId(e.target.value)}
-              style={{ marginLeft: '8px' }}
-              required
-            >
-              <option value="">Selecione um recurso</option>
-              {recursosFiltrados.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.nome}
-                </option>
-              ))}
-            </select>
-          </label>
+          .tabela {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
 
-          <input
-            type="text"
-            placeholder="Cliente"
-            value={cliente}
-            onChange={(e) => setCliente(e.target.value)}
-            required
-          />
+          .tabela th {
+            background: #2c3e50;
+            color: white;
+            padding: 10px;
+          }
 
-          <label>
-            Data de Abertura:
-            <input
-              type="date"
-              value={dataAbertura}
-              onChange={(e) => setDataAbertura(e.target.value)}
-              required
-              style={{ marginLeft: '8px' }}
-            />
-          </label>
+          .tabela td {
+            border: 1px solid #ddd;
+            padding: 10px;
+          }
 
-          <label>
-            Previsão:
-            <input
-              type="date"
-              value={previsao}
-              onChange={(e) => setPrevisao(e.target.value)}
-              required
-              style={{ marginLeft: '8px' }}
-            />
-          </label>
+          .tabela tr:nth-child(even) {
+            background: #f2f2f2;
+          }
 
-          <label>
-            Status:
-            <select value={status} onChange={(e) => setStatus(e.target.value)} style={{ marginLeft: '8px' }}>
-              <option value="Aberta">Aberta</option>
-              <option value="Em Andamento">Em Andamento</option>
-              <option value="Fechada">Fechada</option>
-            </select>
-          </label>
+          .button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+          }
 
-          <button type="submit">Adicionar OS</button>
-          {recursosFiltrados.length === 0 && (
-            <p style={{ color: '#c00' }}>
-              Nenhum recurso disponível para o tipo selecionado. Cadastre recursos em Recursos antes.
-            </p>
-          )}
-        </form>
-      )}
+          .button:hover {
+            background: green;
+          }
 
-      {osAberta && (
-        <section style={{ marginTop: '24px', padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
-          <h2>OS Aberta: {osAberta.os}</h2>
-          <p>
-            <strong>Cliente:</strong> {osAberta.cliente}
-          </p>
-          <p>
-            <strong>Recurso:</strong> {`${osAberta.recursoTipo === 'molde' ? 'Molde' : 'Máquina'} - ${osAberta.recursoNome}`}
-          </p>
-          <p>
-            <strong>Data de Abertura:</strong> {osAberta.abertura}
-          </p>
-          <p>
-            <strong>Previsão:</strong> {osAberta.previsao}
-          </p>
-          <p>
-            <strong>Status:</strong> {osAberta.status}
-          </p>
-        </section>
-      )}
+          .formulario {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            width: 300px;
+            border-radius: 8px;
+          }
+
+          .input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 6px;
+          }
+        `}
+      </style>  
+ 
     </>
-  );
+    
+)
+
 }
+

@@ -15,30 +15,19 @@ const handleUparArquivo = (arquivo)=>{
   const arquivoUpado = arquivo.target.files[0]
   if(arquivoUpado && arquivoUpado.type === "application/pdf"){
      setFile(arquivoUpado);
-  
-  
   }else 
   {return alert("arquivo invalido")}
 }
 
 const handlEnviarBanco = async () =>{
     const formData = new FormData()
-    
     formData.append('file',file)
-    
     try{
-    
     const response = await fetch(URL,{method:'POST', body:formData})
-      
     }catch(e) {
       console.log(e)
-      
     }
-    
-  }
-
-
-
+    }
 
 const [listaDocumentos, setListaDocumentos] = useState([])
 
@@ -46,12 +35,9 @@ useEffect(()=>{
     setListaDocumentos(exemplo)
 },[])
 
-
-
 return(
     <>
     <h1>GDOC - Gestão de Documentos</h1>
-
     <h3>Lista de documentos</h3>
     <table>
         <thead >
@@ -86,13 +72,17 @@ return(
     {/* inserir novo documento */}
     <br/>
     <div>
+
+<h3>Insira novos documentos</h3>
     <input type='file' accept='.pdf' onChange={handleUparArquivo}/>
     <button onClick={handlEnviarBanco}>enviar</button>
 
     </div>
+
+
+
+
+
     </>
 )
-
-
-
 }
