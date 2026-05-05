@@ -9,6 +9,7 @@ export default function Home() {
         <h1 style={styles.title}>
           Bem vindo!
         </h1>
+        <img src='../../assets/injetora.png' width="200px"/>
       </header>
 
       <section style={styles.menuSection}>
