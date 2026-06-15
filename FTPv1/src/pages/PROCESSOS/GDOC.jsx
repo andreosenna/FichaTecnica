@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 
-URL="https://69c55f5e8a5b6e2dec2c4e9b.mockapi.io/gfila/api/upLoad"
+const API_URL = "https://69c55f5e8a5b6e2dec2c4e9b.mockapi.io/gfila/api/upLoad"
 
 export default function GDOC(){
 
@@ -23,7 +23,7 @@ const handlEnviarBanco = async () =>{
     const formData = new FormData()
     formData.append('file',file)
     try{
-    const response = await fetch(URL,{method:'POST', body:formData})
+    const response = await fetch(API_URL,{method:'POST', body:formData})
     }catch(e) {
       console.log(e)
     }

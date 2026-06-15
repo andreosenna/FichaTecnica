@@ -5,7 +5,7 @@
 
 import React, {useEffect, useState} from 'react'
 
-URL="https://69c55f5e8a5b6e2dec2c4e9b.mockapi.io/gfila/api/upLoad"
+//const API_URL = "https://69c55f5e8a5b6e2dec2c4e9b.mockapi.io/gfila/api/upLoad"
 
 export default function GDOC(){
 
@@ -42,7 +42,7 @@ const handlEnviarBanco = async () =>{
     obsDoc,
     file: file ? file.name : null // MockAPI não salva arquivo real
   }
-      const response = await fetch(URL, {
+      const response = await fetch(API_URL, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
@@ -54,7 +54,7 @@ const handlEnviarBanco = async () =>{
 const [listaDocumentos, setListaDocumentos] = useState([])
 
 const baixarBD = async ()=>{
-  const response = await fetch(URL)
+  const response = await fetch(API_URL)
   const data = await response.json()
   setListaDocumentos(data)
 }

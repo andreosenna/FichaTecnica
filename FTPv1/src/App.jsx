@@ -20,6 +20,7 @@ import FormularioRNC from './pages/Qualidade/FormularioRNC'
 import PAPC from './pages/Qualidade/PAPC'
 import RNCCompleta from './pages/Qualidade/RNCCompleta'
 import Recursos from './pages/ADM/Recursos'
+import Gdoc from './pages/PROCESSOS/GDOC'
 
 // --- Subcomponente de Dropdown para Reutilização ---
 const NavDropdown = ({ title, links }) => {
@@ -136,6 +137,7 @@ function Layout() {
           title="Qualidade"
           links={[
             {label:"Controle de RNC", path:"/ControleRNC"},
+            {label:"GDOC - Gestão de Documentos", path:"/GDOC"},
             {label:"Formulario de RNC", path:"/FormularioRNC"},
             {label:"PAPC - Plano de Ação Preventivo Corretivo", path:"/PAPC"}
           ]}
@@ -166,6 +168,8 @@ function Layout() {
           <Route path='/PAPC' element={<PAPC/>}/>
           <Route path='ControleRNC' element={<ControleRNC/>}/>
           <Route path='FormularioRNC' element={<FormularioRNC/>}/>
+          <Route path='/GDOC' element={<Gdoc/>}/>
+          
         </Routes>
       </div>
     </>
